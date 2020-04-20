@@ -9,11 +9,6 @@
 # production
 /build
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # ignore mocks and stubs (TODO: test this and decide)
 # **/*.mock.{ts,tsx}
 # **/*.stub.{ts,tsx}
