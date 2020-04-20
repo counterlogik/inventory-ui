@@ -8,18 +8,30 @@
   "eslint.format.enable": true,
   "[javascript]": {
     "editor.formatOnSave": false,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
   },
   "[javascriptreact]": {
     "editor.formatOnSave": false,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
   },
   "[typescript]": {
     "editor.formatOnSave": false,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
   },
   "[typescriptreact]": {
     "editor.formatOnSave": false,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
   }
 }

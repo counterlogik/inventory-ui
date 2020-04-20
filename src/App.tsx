@@ -1,10 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
-import { MuiThemeProvider } from '@material-ui/core/styles';
-import FavoriteBorderOutlinedIcon from '@material-ui/icons/FavoriteBorderOutlined';
+import { ApolloProvider, useQuery } from '@apollo/react-hooks';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import FavoriteBorderOutlinedIcon from '@material-ui/icons/FavoriteBorderOutlined';
+import ApolloClient, { gql } from 'apollo-boost';
+import React from 'react';
+import styled from 'styled-components';
 import theme from './theme';
 
 const StyledButton = styled(Button)`
@@ -17,21 +18,66 @@ const StyledButton = styled(Button)`
   }
 `;
 
+const client = new ApolloClient({
+  uri: 'http://localhost:4000/graphql',
+});
+
+const ITEMS = gql`
+  query getItems {
+    items {
+      id
+      ownerId
+      description
+      model
+      categories {
+        id
+        title
+      }
+      locations {
+        id
+        title
+      }
+      spark
+      count
+      monetaryValue
+      link
+      notes
+      tags {
+        id
+        title
+      }
+      image
+    }
+  }
+`;
+
+function Items() {
+  const { loading, error, data } = useQuery(ITEMS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  return data.items.map((item: any) => <p>{JSON.stringify(item)}</p>);
+}
+
 function App() {
   return (
-    <MuiThemeProvider theme={theme}>
-      <div className='App'>
-        <h3>inventory</h3>
-        <h6>Placeholder while testing Material UI + more for now.</h6>
-        <Button variant='contained' color='primary'>
-          nothing here
-        </Button>
-        <StyledButton>custom here</StyledButton>
-        <IconButton color='primary' aria-label='love me' component='span'>
-          <FavoriteBorderOutlinedIcon />
-        </IconButton>
-      </div>
-    </MuiThemeProvider>
+    <ApolloProvider client={client}>
+      <MuiThemeProvider theme={theme}>
+        <div className='App'>
+          <h3>inventory</h3>
+          <h6>Placeholder while testing Material UI + more for now.</h6>
+          <Button variant='contained' color='primary'>
+            nothing here
+          </Button>
+          <StyledButton>custom here</StyledButton>
+          <IconButton color='primary' aria-label='love me' component='span'>
+            <FavoriteBorderOutlinedIcon />
+          </IconButton>
+          <Items />
+        </div>
+      </MuiThemeProvider>
+    </ApolloProvider>
   );
 }
 
