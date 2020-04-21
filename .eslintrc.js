@@ -14,7 +14,8 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'import', 'jsx-a11y', 'prettier', 'react', 'react-hooks'],
   rules: {
-    "@typescript-eslint/explicit-function-return-type": "off",
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     'comma-dangle': ['error', 'always-multiline'],
     'eol-last': 'error',
     'import/no-deprecated': 'warn',
