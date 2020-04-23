@@ -2,34 +2,7 @@ import React from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
-
-interface Item {
-  id: number;
-  description: string;
-  model: string;
-  categories: {
-    id: number;
-    title: string;
-  }[];
-  locations: {
-    id: number;
-    title: string;
-  }[];
-  spark: 'LIKE' | 'LOVE' | 'NEED' | 'LOSE';
-  count: number;
-  monetaryValue: number;
-  link: string;
-  notes: string;
-  tags: {
-    id: number;
-    title: string;
-  }[];
-  image: string;
-}
-
-interface ItemsData {
-  items: Item[];
-}
+import { GetItemsQuery, Item } from '../generated/graphql';
 
 const GET_ITEMS = gql`
   query getItems {
@@ -60,15 +33,19 @@ const GET_ITEMS = gql`
 `;
 
 export default function ItemCollection(props: RouteComponentProps) {
-  const { loading, error, data } = useQuery<ItemsData>(GET_ITEMS);
+  const { loading, error, data } = useQuery<GetItemsQuery>(GET_ITEMS);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
   return (
     <>
-      {data!.items.map((item: Item) => {
-        return <p key={item.id}>{JSON.stringify(item)}</p>;
+      {data!.items.map((item: Pick<Item, 'id' | 'description'>) => {
+        return (
+          <p key={item.id}>
+            {item.id} {item.description}
+          </p>
+        );
       })}
     </>
   );
