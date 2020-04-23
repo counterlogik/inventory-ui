@@ -9,6 +9,7 @@ import {
   UpdateItemDocument,
   UpdateItemMutation,
   UpdateItemMutationVariables,
+  Item,
 } from '../generated/graphql';
 
 const UPDATE_ITEM = gql`
@@ -30,49 +31,48 @@ const UPDATE_ITEM = gql`
   }
 `;
 
-interface UpdateItemProps extends RouteComponentProps {
-  itemId?: string;
+interface UpdateItemProps {
+  id: number;
+  description: string;
+  model: string | null | undefined;
+  count: number;
+  monetaryValue: number | null | undefined;
+  link: string | null | undefined;
+  notes: string | null | undefined;
+  image: string | null | undefined;
+  removeUnderEdit: () => void;
 }
 
-export default function UpdateItem(props: UpdateItemProps) {
-  const id = props.itemId ? parseInt(props.itemId) : null;
-  const [description, setDescription] = useState('');
-  const [model, setModel] = useState('');
-  const [count, setCount] = useState(1);
-  const [monetaryValue, setMonetaryValue] = useState(0);
-  const [link, setLink] = useState('');
-  const [notes, setNotes] = useState('');
-  const [image, setImage] = useState('');
+export default function UpdateItem(itemData: UpdateItemProps) {
+  const id = itemData.id;
+  const [description, setDescription] = useState(itemData.description);
+  const [model, setModel] = useState(itemData.model || '');
+  const [count, setCount] = useState(itemData.count || 1);
+  const [monetaryValue, setMonetaryValue] = useState(itemData.monetaryValue || 0);
+  const [link, setLink] = useState(itemData.link || '');
+  const [notes, setNotes] = useState(itemData.notes || '');
+  const [image, setImage] = useState(itemData.image || '');
 
-  const { loading: queryLoading, error: queryError, data } = useQuery<GetItemQuery, GetItemQueryVariables>(
-    GetItemDocument,
+  const [updateItem, { loading, error }] = useMutation<UpdateItemMutation, UpdateItemMutationVariables>(
+    UpdateItemDocument,
     {
-      variables: { where: { id } },
+      variables: {
+        data: {
+          id,
+          description,
+          model,
+          count,
+          monetaryValue,
+          link,
+          notes,
+          image,
+        },
+        where: {
+          id,
+        },
+      },
     },
   );
-  const [updateItem, { loading: mutationLoading, error: mutationError }] = useMutation<
-    UpdateItemMutation,
-    UpdateItemMutationVariables
-  >(UpdateItemDocument, {
-    variables: {
-      data: {
-        id,
-        description,
-        model,
-        count,
-        monetaryValue,
-        link,
-        notes,
-        image,
-      },
-      where: {
-        id,
-      },
-    },
-  });
-
-  if (queryLoading) return <p>loading item...</p>;
-  if (queryError) return <p>error loading item</p>;
 
   return (
     <div>
@@ -82,67 +82,46 @@ export default function UpdateItem(props: UpdateItemProps) {
         onSubmit={(e) => {
           e.preventDefault();
           updateItem();
+          itemData.removeUnderEdit();
         }}
       >
         <p>
           <label htmlFor='description'>description</label>
-          <input
-            name='description'
-            defaultValue={data?.item?.description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+          <input name='description' defaultValue={description} onChange={(e) => setDescription(e.target.value)} />
         </p>
         <p>
           <label htmlFor='model'>model</label>
-          <input
-            name='model'
-            defaultValue={data?.item?.model || undefined}
-            onChange={(e) => setModel(e.target.value)}
-          />
+          <input name='model' defaultValue={model} onChange={(e) => setModel(e.target.value)} />
         </p>
         <p>
           <label htmlFor='count'>count</label>
-          <input
-            name='count'
-            type='number'
-            defaultValue={data?.item?.count}
-            onChange={(e) => setCount(+e.target.value)}
-          />
+          <input name='count' type='number' defaultValue={count} onChange={(e) => setCount(+e.target.value)} />
         </p>
         <p>
           <label htmlFor='monetary-value'>value in $</label>
           <input
             name='monetary-value'
             type='number'
-            defaultValue={data?.item?.monetaryValue || undefined}
+            defaultValue={monetaryValue}
             onChange={(e) => setMonetaryValue(+e.target.value)}
           />
         </p>
         <p>
           <label htmlFor='link'>link</label>
-          <input name='link' defaultValue={data?.item?.link || undefined} onChange={(e) => setLink(e.target.value)} />
+          <input name='link' defaultValue={link} onChange={(e) => setLink(e.target.value)} />
         </p>
         <p>
           <label htmlFor='notes'>notes</label>
-          <input
-            name='notes'
-            defaultValue={data?.item?.notes || undefined}
-            onChange={(e) => setNotes(e.target.value)}
-          />
+          <input name='notes' defaultValue={notes} onChange={(e) => setNotes(e.target.value)} />
         </p>
         <p>
           <label htmlFor='image'>image</label>
-          <input
-            name='image'
-            defaultValue={data?.item?.image || undefined}
-            onChange={(e) => setImage(e.target.value)}
-          />
+          <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
         </p>
         <button type='submit'>update item</button>
       </form>
-      {mutationLoading && <p>updating item...</p>}
-      {mutationError && <p>error updating. please try again</p>}
-      {!mutationLoading && <Link to={'/viewItem/' + id}>view this item</Link>}
+      {loading && <p>updating...</p>}
+      {error && <p>error. please try again</p>}
     </div>
   );
 }

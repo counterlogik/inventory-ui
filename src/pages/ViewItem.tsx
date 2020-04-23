@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
-import { RouteComponentProps, Link } from '@reach/router';
+import { RouteComponentProps } from '@reach/router';
 import { GetItemQuery, GetItemQueryVariables } from '../generated/graphql';
+import UpdateItem from './UpdateItem';
 
 const GET_ITEM = gql`
   query getItem($where: ItemWhereUniqueInput!) {
@@ -37,6 +38,8 @@ interface ViewItemProps extends RouteComponentProps {
 }
 
 export default function ViewItem(props: ViewItemProps) {
+  const [underEdit, setUnderEdit] = useState(false);
+
   const { loading, error, data } = useQuery<GetItemQuery, GetItemQueryVariables>(GET_ITEM, {
     variables: { where: { id: props.itemId ? parseInt(props.itemId) : null } },
   });
@@ -46,17 +49,33 @@ export default function ViewItem(props: ViewItemProps) {
 
   return props.itemId && data && data.item ? (
     <div className='wrapper'>
-      <div className='details'>
-        <h4>{data.item.description}</h4>
-        {data.item.model && <h5>{data.item.model}</h5>}
-        {data.item.spark && <h6>{data.item.spark}</h6>}
-        {data.item.count && <div className='detail'>{data.item.count}</div>}
-        {data.item.monetaryValue && <div className='detail'>{data.item.monetaryValue}</div>}
-        {data.item.link && <div className='detail'>{data.item.link}</div>}
-        {data.item.notes && <div className='detail'>{data.item.notes}</div>}
-        {data.item.image && <div className='detail'>{data.item.image}</div>}
-      </div>
-      <Link to={'/updateItem/' + props.itemId}>edit this item</Link>
+      <button onClick={() => setUnderEdit(!underEdit)}>toggle edit mode</button>
+      {!underEdit ? (
+        <div className='details'>
+          <h4>{data.item.description} [viewing]</h4>
+          {data.item.model && <h5>{data.item.model}</h5>}
+          {data.item.spark && <h6>{data.item.spark}</h6>}
+          {data.item.count && <div className='detail'>{data.item.count}</div>}
+          {data.item.monetaryValue && <div className='detail'>{data.item.monetaryValue}</div>}
+          {data.item.link && <div className='detail'>{data.item.link}</div>}
+          {data.item.notes && <div className='detail'>{data.item.notes}</div>}
+          {data.item.image && <div className='detail'>{data.item.image}</div>}
+        </div>
+      ) : (
+        <UpdateItem
+          {...{
+            id: data.item.id,
+            description: data.item.description,
+            model: data.item.model,
+            count: data.item.count,
+            monetaryValue: data.item.monetaryValue,
+            link: data.item.link,
+            notes: data.item.notes,
+            image: data.item.image,
+            removeUnderEdit: () => setUnderEdit(false),
+          }}
+        />
+      )}
     </div>
   ) : (
     <p>No item found, sending you back for now!</p>

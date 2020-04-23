@@ -7,7 +7,6 @@ import ItemCollection from './pages/ItemCollection';
 import CategoryCollection from './pages/CategoryCollection';
 import ViewItem from './pages/ViewItem';
 import AddItem from './pages/AddItem';
-import UpdateItem from './pages/UpdateItem';
 import theme from './theme';
 
 const client = new ApolloClient({
@@ -23,18 +22,17 @@ function App() {
             <h3>inventory</h3>
             <nav>
               <Link to='/'>home</Link>
-              <Link to='items'>items</Link>
-              <Link to='categories'>categories</Link>
-              <Link to='addItem'>+ add item</Link>
+              <Link to='/items'>items</Link>
+              <Link to='/categories'>categories</Link>
+              <Link to='/items/add'>+ add item</Link>
             </nav>
           </header>
           <Router>
             <ItemCollection path='/' />
-            <ViewItem path='viewItem/:itemId' />
-            <AddItem path='addItem' />
-            <UpdateItem path='updateItem/:itemId' />
             <ItemCollection path='items' />
             <CategoryCollection path='categories' />
+            <AddItem path='items/add' />
+            <ViewItem path='items/:itemId' />
           </Router>
         </main>
       </MuiThemeProvider>
