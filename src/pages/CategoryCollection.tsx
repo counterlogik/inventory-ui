@@ -1,6 +1,7 @@
 import React from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
+import { RouteComponentProps } from '@reach/router';
 
 interface Category {
   id: number;
@@ -28,7 +29,7 @@ const GET_CATEGORIES = gql`
   }
 `;
 
-function Categories() {
+export default function CategoryCollection(props: RouteComponentProps) {
   const { loading, error, data } = useQuery<CategoriesData>(GET_CATEGORIES);
 
   if (loading) return <p>Loading...</p>;
@@ -42,14 +43,3 @@ function Categories() {
     </>
   );
 }
-
-function CategoryCollection() {
-  return (
-    <div className='Categories'>
-      <p>category cards/previews will live here.</p>
-      <Categories />
-    </div>
-  );
-}
-
-export default CategoryCollection;

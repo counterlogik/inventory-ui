@@ -1,6 +1,7 @@
 import React from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
+import { RouteComponentProps } from '@reach/router';
 
 interface Item {
   id: number;
@@ -58,7 +59,7 @@ const GET_ITEMS = gql`
   }
 `;
 
-function Items() {
+export default function ItemCollection(props: RouteComponentProps) {
   const { loading, error, data } = useQuery<ItemsData>(GET_ITEMS);
 
   if (loading) return <p>Loading...</p>;
@@ -72,13 +73,3 @@ function Items() {
     </>
   );
 }
-
-function ItemCollection() {
-  return (
-    <div className='collection'>
-      <Items />
-    </div>
-  );
-}
-
-export default ItemCollection;

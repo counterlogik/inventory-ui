@@ -1,6 +1,7 @@
 import React from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
+import { RouteComponentProps } from '@reach/router';
 
 interface Item {
   id: number;
@@ -54,9 +55,13 @@ const GET_ITEM = gql`
   }
 `;
 
-function Item({ id = 1 }) {
+interface ViewItemProps extends RouteComponentProps {
+  itemId?: string;
+}
+
+export default function ViewItem(props: ViewItemProps) {
   const { loading, error, data } = useQuery<Item>(GET_ITEM, {
-    variables: { id },
+    variables: { id: props.itemId },
   });
 
   if (loading) return <p>Loading...</p>;
@@ -64,13 +69,3 @@ function Item({ id = 1 }) {
 
   return data ? <p key={data.id}>{JSON.stringify(data)}</p> : <p>No item found, sending you back for now!</p>;
 }
-
-function ItemView() {
-  return (
-    <div className='item'>
-      <Item />
-    </div>
-  );
-}
-
-export default ItemView;
