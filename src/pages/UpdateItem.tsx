@@ -93,7 +93,7 @@ const UPDATE_ITEM = gql`
     # $tags: String!,
     $image: String!
   ) {
-    updateItem(
+    updateOneItem(
       id: $id
       model: $model
       # categories: $categories,

@@ -5,6 +5,7 @@ import { RouteComponentProps } from '@reach/router';
 
 interface Item {
   id: number;
+  ownerId: number;
   description: string;
   model: string;
   // categories: {
@@ -28,6 +29,7 @@ interface Item {
 }
 
 interface ItemDetails {
+  owner: { connect: { id: number } };
   description: string;
   model: string;
   // categories: {
@@ -51,33 +53,12 @@ interface ItemDetails {
 }
 
 const ADD_ITEM = gql`
-  mutation AddItem(
-    $description: String!
-    $model: String!
-    # $categories: String!,
-    # $locations: String!,
-    $spark: String!
-    $count: String!
-    $monetaryValue: String!
-    $link: String!
-    $notes: String!
-    # $tags: String!,
-    $image: String!
-  ) {
-    addItem(
-      description: $description
-      model: $model
-      # categories: $categories,
-      # locations: $locations,
-      spark: $spark
-      count: $count
-      monetaryValue: $monetaryValue
-      link: $link
-      notes: $notes
-      # tags: $tags,
-      image: $image
-    ) {
+  mutation AddItem($data: ItemCreateInput!) {
+    createOneItem(data: $data) {
       id
+      owner {
+        email
+      }
       description
       model
       # categories {
@@ -115,9 +96,10 @@ export default function AddItem(props: RouteComponentProps) {
   // const [tags, setTags] = useState('');
   const [image, setImage] = useState('');
 
-  const [addItem, { error, data }] = useMutation<{ addItem: Item }, { item: ItemDetails }>(ADD_ITEM, {
+  const [addItem, { error, data }] = useMutation<{ addItem: Item }, { data: ItemDetails }>(ADD_ITEM, {
     variables: {
-      item: {
+      data: {
+        owner: { connect: { id: 1 } },
         description,
         model,
         // categories,
@@ -163,7 +145,6 @@ export default function AddItem(props: RouteComponentProps) {
             <option value='NEED'>need</option>
             <option value='LOSE'>like</option>
           </select>
-          <input name='spark' onChange={(e) => setSpark(e.target.value)} />
         </p>
         <p>
           <label htmlFor='count'>count</label>
