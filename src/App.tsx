@@ -18,23 +18,25 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <MuiThemeProvider theme={theme}>
-        <header>
-          <h3>inventory</h3>
-          <nav>
-            <Link to='/'>home</Link>
-            <Link to='items'>items</Link>
-            <Link to='categories'>categories</Link>
-            <Link to='addItem'>+ add item</Link>
-          </nav>
-        </header>
-        <Router>
-          <ItemCollection path='/' />
-          <ViewItem path='viewItem/:itemId' />
-          <AddItem path='addItem' />
-          <UpdateItem path='updateItem/:itemId' />
-          <ItemCollection path='items' />
-          <CategoryCollection path='categories' />
-        </Router>
+        <main className='application-wrapper'>
+          <header>
+            <h3>inventory</h3>
+            <nav>
+              <Link to='/'>home</Link>
+              <Link to='items'>items</Link>
+              <Link to='categories'>categories</Link>
+              <Link to='addItem'>+ add item</Link>
+            </nav>
+          </header>
+          <Router>
+            <ItemCollection path='/' />
+            <ViewItem path='viewItem/:itemId' />
+            <AddItem path='addItem' />
+            <UpdateItem path='updateItem/:itemId' />
+            <ItemCollection path='items' />
+            <CategoryCollection path='categories' />
+          </Router>
+        </main>
       </MuiThemeProvider>
     </ApolloProvider>
   );

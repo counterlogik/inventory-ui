@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { gql } from 'apollo-boost';
 import { useMutation } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
-import { Item, ItemCreateInput } from '../generated/graphql';
+import { AddItemDocument, AddItemMutation, AddItemMutationVariables } from '../generated/graphql';
 
 const ADD_ITEM = gql`
   mutation AddItem($data: ItemCreateInput!) {
@@ -32,7 +32,7 @@ export default function AddItem(props: RouteComponentProps) {
   const [notes, setNotes] = useState('');
   const [image, setImage] = useState('');
 
-  const [addItem, { error, data }] = useMutation<{ addItem: Item }, { data: ItemCreateInput }>(ADD_ITEM, {
+  const [addItem, { error, data }] = useMutation<AddItemMutation, AddItemMutationVariables>(AddItemDocument, {
     variables: {
       data: {
         owner: { connect: { id: 1 } },
@@ -51,7 +51,7 @@ export default function AddItem(props: RouteComponentProps) {
     <div>
       <h3>+ add item</h3>
       {error ? <p>oh no! {error.message}</p> : null}
-      {data && data.addItem ? <p>item saved!</p> : null}
+      {data && data.createOneItem ? <p>item saved!</p> : null}
       <form>
         <p>
           <label htmlFor='description'>description</label>
