@@ -1,0 +1,101 @@
+mutation AddItem($data: ItemCreateInput!) {
+  createOneItem(data: $data) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+  }
+}
+
+query getUserCategories($ownerId: Int) {
+  categoriesByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+
+query getUserLocations($ownerId: Int) {
+  locationsByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+
+query getUserTags($ownerId: Int) {
+  tagsByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+
+mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
+  updateOneItem(data: $data, where: $where) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+    categories {
+      id
+      title
+      ownerId
+    }
+    locations {
+      id
+      title
+      ownerId
+    }
+    tags {
+      id
+      title
+      ownerId
+    }
+  }
+}
+
+mutation AddOrUpdateItem($update: ItemUpdateInput!, $where: ItemWhereUniqueInput!, $create: ItemCreateInput!) {
+  upsertOneItem(update: $update, where: $where, create: $create) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+    categories {
+      id
+      title
+      ownerId
+    }
+    locations {
+      id
+      title
+      ownerId
+    }
+    tags {
+      id
+      title
+      ownerId
+    }
+  }
+}

@@ -315,6 +315,7 @@ export type Mutation = {
   updateOneCategory?: Maybe<Category>;
   updateOneTag?: Maybe<Tag>;
   updateOneItem?: Maybe<Item>;
+  upsertOneItem: Item;
 };
 
 
@@ -380,6 +381,13 @@ export type MutationUpdateOneTagArgs = {
 export type MutationUpdateOneItemArgs = {
   data: ItemUpdateInput;
   where: ItemWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneItemArgs = {
+  where: ItemWhereUniqueInput;
+  create: ItemCreateInput;
+  update: ItemUpdateInput;
 };
 
 export type UserCreateInput = {
@@ -1441,23 +1449,6 @@ export type ItemUpdateInput = {
   tags?: Maybe<TagUpdateManyWithoutItemsInput>;
 };
 
-export type AddItemMutationVariables = {
-  data: ItemCreateInput;
-};
-
-
-export type AddItemMutation = (
-  { __typename?: 'Mutation' }
-  & { createOneItem: (
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ) }
-  ) }
-);
-
 export type GetCategoriesQueryVariables = {};
 
 
@@ -1482,6 +1473,23 @@ export type GetItemsQuery = (
     { __typename?: 'Item' }
     & Pick<Item, 'id' | 'description' | 'model'>
   )> }
+);
+
+export type AddItemMutationVariables = {
+  data: ItemCreateInput;
+};
+
+
+export type AddItemMutation = (
+  { __typename?: 'Mutation' }
+  & { createOneItem: (
+    { __typename?: 'Item' }
+    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: (
+      { __typename?: 'User' }
+      & Pick<User, 'email'>
+    ) }
+  ) }
 );
 
 export type GetUserCategoriesQueryVariables = {
@@ -1540,8 +1548,42 @@ export type UpdateItemMutation = (
     ), categories: Array<(
       { __typename?: 'Category' }
       & Pick<Category, 'id' | 'title' | 'ownerId'>
+    )>, locations: Array<(
+      { __typename?: 'Location' }
+      & Pick<Location, 'id' | 'title' | 'ownerId'>
+    )>, tags: Array<(
+      { __typename?: 'Tag' }
+      & Pick<Tag, 'id' | 'title' | 'ownerId'>
     )> }
   )> }
+);
+
+export type AddOrUpdateItemMutationVariables = {
+  update: ItemUpdateInput;
+  where: ItemWhereUniqueInput;
+  create: ItemCreateInput;
+};
+
+
+export type AddOrUpdateItemMutation = (
+  { __typename?: 'Mutation' }
+  & { upsertOneItem: (
+    { __typename?: 'Item' }
+    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: (
+      { __typename?: 'User' }
+      & Pick<User, 'email'>
+    ), categories: Array<(
+      { __typename?: 'Category' }
+      & Pick<Category, 'id' | 'title' | 'ownerId'>
+    )>, locations: Array<(
+      { __typename?: 'Location' }
+      & Pick<Location, 'id' | 'title' | 'ownerId'>
+    )>, tags: Array<(
+      { __typename?: 'Tag' }
+      & Pick<Tag, 'id' | 'title' | 'ownerId'>
+    )> }
+  ) }
 );
 
 export type GetItemQueryVariables = {
@@ -1571,49 +1613,6 @@ export type GetItemQuery = (
 );
 
 
-export const AddItemDocument = gql`
-    mutation AddItem($data: ItemCreateInput!) {
-  createOneItem(data: $data) {
-    id
-    owner {
-      email
-    }
-    description
-    model
-    spark
-    count
-    monetaryValue
-    link
-    notes
-    image
-  }
-}
-    `;
-export type AddItemMutationFn = ApolloReactCommon.MutationFunction<AddItemMutation, AddItemMutationVariables>;
-
-/**
- * __useAddItemMutation__
- *
- * To run a mutation, you first call `useAddItemMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useAddItemMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [addItemMutation, { data, loading, error }] = useAddItemMutation({
- *   variables: {
- *      data: // value for 'data'
- *   },
- * });
- */
-export function useAddItemMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddItemMutation, AddItemMutationVariables>) {
-        return ApolloReactHooks.useMutation<AddItemMutation, AddItemMutationVariables>(AddItemDocument, baseOptions);
-      }
-export type AddItemMutationHookResult = ReturnType<typeof useAddItemMutation>;
-export type AddItemMutationResult = ApolloReactCommon.MutationResult<AddItemMutation>;
-export type AddItemMutationOptions = ApolloReactCommon.BaseMutationOptions<AddItemMutation, AddItemMutationVariables>;
 export const GetCategoriesDocument = gql`
     query getCategories {
   categories {
@@ -1686,6 +1685,49 @@ export function useGetItemsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type GetItemsQueryHookResult = ReturnType<typeof useGetItemsQuery>;
 export type GetItemsLazyQueryHookResult = ReturnType<typeof useGetItemsLazyQuery>;
 export type GetItemsQueryResult = ApolloReactCommon.QueryResult<GetItemsQuery, GetItemsQueryVariables>;
+export const AddItemDocument = gql`
+    mutation AddItem($data: ItemCreateInput!) {
+  createOneItem(data: $data) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+  }
+}
+    `;
+export type AddItemMutationFn = ApolloReactCommon.MutationFunction<AddItemMutation, AddItemMutationVariables>;
+
+/**
+ * __useAddItemMutation__
+ *
+ * To run a mutation, you first call `useAddItemMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddItemMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addItemMutation, { data, loading, error }] = useAddItemMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useAddItemMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddItemMutation, AddItemMutationVariables>) {
+        return ApolloReactHooks.useMutation<AddItemMutation, AddItemMutationVariables>(AddItemDocument, baseOptions);
+      }
+export type AddItemMutationHookResult = ReturnType<typeof useAddItemMutation>;
+export type AddItemMutationResult = ApolloReactCommon.MutationResult<AddItemMutation>;
+export type AddItemMutationOptions = ApolloReactCommon.BaseMutationOptions<AddItemMutation, AddItemMutationVariables>;
 export const GetUserCategoriesDocument = gql`
     query getUserCategories($ownerId: Int) {
   categoriesByUser(ownerId: $ownerId) {
@@ -1808,6 +1850,16 @@ export const UpdateItemDocument = gql`
       title
       ownerId
     }
+    locations {
+      id
+      title
+      ownerId
+    }
+    tags {
+      id
+      title
+      ownerId
+    }
   }
 }
     `;
@@ -1837,6 +1889,66 @@ export function useUpdateItemMutation(baseOptions?: ApolloReactHooks.MutationHoo
 export type UpdateItemMutationHookResult = ReturnType<typeof useUpdateItemMutation>;
 export type UpdateItemMutationResult = ApolloReactCommon.MutationResult<UpdateItemMutation>;
 export type UpdateItemMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateItemMutation, UpdateItemMutationVariables>;
+export const AddOrUpdateItemDocument = gql`
+    mutation AddOrUpdateItem($update: ItemUpdateInput!, $where: ItemWhereUniqueInput!, $create: ItemCreateInput!) {
+  upsertOneItem(update: $update, where: $where, create: $create) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+    categories {
+      id
+      title
+      ownerId
+    }
+    locations {
+      id
+      title
+      ownerId
+    }
+    tags {
+      id
+      title
+      ownerId
+    }
+  }
+}
+    `;
+export type AddOrUpdateItemMutationFn = ApolloReactCommon.MutationFunction<AddOrUpdateItemMutation, AddOrUpdateItemMutationVariables>;
+
+/**
+ * __useAddOrUpdateItemMutation__
+ *
+ * To run a mutation, you first call `useAddOrUpdateItemMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddOrUpdateItemMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addOrUpdateItemMutation, { data, loading, error }] = useAddOrUpdateItemMutation({
+ *   variables: {
+ *      update: // value for 'update'
+ *      where: // value for 'where'
+ *      create: // value for 'create'
+ *   },
+ * });
+ */
+export function useAddOrUpdateItemMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<AddOrUpdateItemMutation, AddOrUpdateItemMutationVariables>) {
+        return ApolloReactHooks.useMutation<AddOrUpdateItemMutation, AddOrUpdateItemMutationVariables>(AddOrUpdateItemDocument, baseOptions);
+      }
+export type AddOrUpdateItemMutationHookResult = ReturnType<typeof useAddOrUpdateItemMutation>;
+export type AddOrUpdateItemMutationResult = ApolloReactCommon.MutationResult<AddOrUpdateItemMutation>;
+export type AddOrUpdateItemMutationOptions = ApolloReactCommon.BaseMutationOptions<AddOrUpdateItemMutation, AddOrUpdateItemMutationVariables>;
 export const GetItemDocument = gql`
     query getItem($where: ItemWhereUniqueInput!) {
   item(where: $where) {
