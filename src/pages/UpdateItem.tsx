@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
-import Chip from '@material-ui/core/Chip';
-import RemoveIcon from '@material-ui/icons/RemoveCircleOutlineSharp';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
 import {
   UpdateItemDocument,
   UpdateItemMutation,
@@ -13,12 +9,37 @@ import {
   GetUserCategoriesQuery,
   GetUserCategoriesQueryVariables,
   GetUserCategoriesDocument,
-  Category,
+  GetUserLocationsQuery,
+  GetUserLocationsQueryVariables,
+  GetUserLocationsDocument,
+  GetUserTagsQuery,
+  GetUserTagsQueryVariables,
+  GetUserTagsDocument,
 } from '../generated/graphql';
+import { ItemIdTitleCompoundVariables } from '../interfaces/helper-interfaces';
+import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
 
 const GET_USER_CATEGORIES = gql`
   query getUserCategories($ownerId: Int) {
     categoriesByUser(ownerId: $ownerId) {
+      id
+      title
+    }
+  }
+`;
+
+const GET_USER_LOCATIONS = gql`
+  query getUserLocations($ownerId: Int) {
+    locationsByUser(ownerId: $ownerId) {
+      id
+      title
+    }
+  }
+`;
+
+const GET_USER_TAGS = gql`
+  query getUserTags($ownerId: Int) {
+    tagsByUser(ownerId: $ownerId) {
       id
       title
     }
@@ -58,26 +79,27 @@ interface UpdateItemProps {
   link: string | null | undefined;
   notes: string | null | undefined;
   image: string | null | undefined;
-  categories: Pick<Category, 'id' | 'title'>[];
+  categories: ItemIdTitleCompoundVariables[];
+  locations: ItemIdTitleCompoundVariables[];
+  tags: ItemIdTitleCompoundVariables[];
   removeUnderEdit: () => void;
 }
 
-interface ItemIdTitleCompoundVariables {
-  id: number;
-  title: string;
-}
-
-export default function UpdateItem(itemData: UpdateItemProps) {
-  const id = itemData.id;
-  const [description, setDescription] = useState(itemData.description);
-  const [model, setModel] = useState(itemData.model || '');
-  const [count, setCount] = useState(itemData.count || 1);
-  const [monetaryValue, setMonetaryValue] = useState(itemData.monetaryValue || 0);
-  const [link, setLink] = useState(itemData.link || '');
-  const [notes, setNotes] = useState(itemData.notes || '');
-  const [image, setImage] = useState(itemData.image || '');
-  const [categories, setCategories] = useState(itemData.categories || []);
+export default function UpdateItem(props: UpdateItemProps): React.ReactElement<UpdateItemProps> {
+  const id = props.id;
+  const [description, setDescription] = useState(props.description);
+  const [model, setModel] = useState(props.model || '');
+  const [count, setCount] = useState(props.count || 1);
+  const [monetaryValue, setMonetaryValue] = useState(props.monetaryValue || 0);
+  const [link, setLink] = useState(props.link || '');
+  const [notes, setNotes] = useState(props.notes || '');
+  const [image, setImage] = useState(props.image || '');
+  const [categories, setCategories] = useState(props.categories || []);
   const [disconnectCategories, setDisconnectCategories] = useState<ItemIdTitleCompoundVariables[]>([]);
+  const [locations, setLocations] = useState(props.locations || []);
+  const [disconnectLocations, setDisconnectLocations] = useState<ItemIdTitleCompoundVariables[]>([]);
+  const [tags, setTags] = useState(props.tags || []);
+  const [disconnectTags, setDisconnectTags] = useState<ItemIdTitleCompoundVariables[]>([]);
 
   const [updateItem, { loading, error }] = useMutation<UpdateItemMutation, UpdateItemMutationVariables>(
     UpdateItemDocument,
@@ -149,6 +171,20 @@ export default function UpdateItem(itemData: UpdateItemProps) {
     variables: { ownerId: 1 },
   });
 
+  const { loading: userLocationsLoading, error: userLocationsError, data: userLocationsData } = useQuery<
+    GetUserLocationsQuery,
+    GetUserLocationsQueryVariables
+  >(GetUserLocationsDocument, {
+    variables: { ownerId: 1 },
+  });
+
+  const { loading: userTagsLoading, error: userTagsError, data: userTagsData } = useQuery<
+    GetUserTagsQuery,
+    GetUserTagsQueryVariables
+  >(GetUserTagsDocument, {
+    variables: { ownerId: 1 },
+  });
+
   return (
     <div>
       <h3>update item: {id}</h3>
@@ -157,7 +193,7 @@ export default function UpdateItem(itemData: UpdateItemProps) {
         onSubmit={async (e) => {
           e.preventDefault();
           await updateItem();
-          await itemData.removeUnderEdit();
+          props.removeUnderEdit();
         }}
       >
         <p>
@@ -193,82 +229,25 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           <label htmlFor='image'>image</label>
           <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
         </p>
-        // TODO: still need to deal with the cse of disconnecting removed entries
-        <Autocomplete
-          multiple
-          id='tags-filled'
-          filterSelectedOptions
-          options={userCategoriesData?.categoriesByUser?.map((category) => category.title) || []}
-          value={categories.map((category) => category.title)}
-          freeSolo
-          renderTags={(connectedEntries, getTagProps) =>
-            connectedEntries.map((currentEntryTitle, index) => (
-              <Chip
-                variant='outlined'
-                label={currentEntryTitle}
-                {...getTagProps({ index })}
-                deleteIcon={<RemoveIcon />}
-                onDelete={(event) => {
-                  event.stopPropagation();
-                  const oneEntryLess = connectedEntries.filter((entryTitle) => entryTitle !== currentEntryTitle);
-                  const newCategories = [...categories.filter((category) => oneEntryLess.includes(category.title))];
-                  setCategories(newCategories);
-                  // if this is a category that currently exists in the database then set it for disconnection from this Item
-                  if (
-                    userCategoriesData?.categoriesByUser &&
-                    userCategoriesData?.categoriesByUser.find(
-                      (categoryByUser) => categoryByUser.title === currentEntryTitle,
-                    ) &&
-                    !disconnectCategories.find((disconnectCategory) => disconnectCategory.title === currentEntryTitle)
-                  ) {
-                    setDisconnectCategories([...disconnectCategories, { id: 1, title: currentEntryTitle }]);
-                  }
-                }}
-              />
-            ))
+
+        <ChipsCollectionInput
+          existingEntryOptions={userCategoriesData?.categoriesByUser as ItemIdTitleCompoundVariables[]}
+          selectedEntries={categories}
+          disconnectEntries={disconnectCategories}
+          setSelectedEntries={setCategories as (value: React.SetStateAction<ItemIdTitleCompoundVariables[]>) => {}}
+          setDisconnectEntries={
+            setDisconnectCategories as (
+              value:
+                | React.Dispatch<React.SetStateAction<ItemIdTitleCompoundVariables[]>>
+                | ItemIdTitleCompoundVariables[],
+            ) => {}
           }
-          renderInput={(params) => <TextField {...params} variant='filled' />}
-          onChange={(event, value: string[], reason: string) => {
-            // TODO: also need to handle case of category existing already for the use or in the current set to be written
-            event.preventDefault();
-            const appendCategoryTitle = value.splice(-1)[0];
-
-            const categoryMatch = categories.map((category) => category.title).includes(appendCategoryTitle);
-
-            const userCategoryMatch =
-              userCategoriesData?.categoriesByUser &&
-              userCategoriesData?.categoriesByUser.find(
-                (categoryByUser) => categoryByUser.title === appendCategoryTitle,
-              );
-
-            if (reason === 'create-option' && !categoryMatch && !userCategoryMatch) {
-              setCategories([...categories, { id: 0, title: appendCategoryTitle } as Pick<Category, 'id' | 'title'>]);
-            } else if (reason === 'select-option') {
-              if (userCategoryMatch) {
-                setCategories([...categories, userCategoryMatch as Pick<Category, 'id' | 'title'>]);
-                const inDisconnectCategories = disconnectCategories.find(
-                  (disconnectCategory) => disconnectCategory.title === appendCategoryTitle,
-                );
-                if (inDisconnectCategories) {
-                  setDisconnectCategories([
-                    ...disconnectCategories.filter(
-                      (disconnectCategory) => disconnectCategory.title !== appendCategoryTitle,
-                    ),
-                  ]);
-                }
-              } else {
-                setCategories([
-                  ...categories,
-                  {
-                    id: 0,
-                    title: appendCategoryTitle,
-                  } as Pick<Category, 'id' | 'title'>,
-                ]);
-              }
-            }
-          }}
         />
-        <p>{disconnectCategories.length && JSON.stringify(disconnectCategories)}</p>
+
+        <p>{locations.length && JSON.stringify(locations)}</p>
+        <p>{disconnectLocations.length && JSON.stringify(disconnectLocations)}</p>
+        <p>{tags.length && JSON.stringify(tags)}</p>
+        <p>{disconnectTags.length && JSON.stringify(disconnectTags)}</p>
         <button type='submit'>update item</button>
       </form>
       {loading && <p>updating...</p>}

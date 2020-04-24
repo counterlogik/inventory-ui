@@ -25,6 +25,8 @@ export type Query = {
   tag?: Maybe<Tag>;
   tags: Array<Tag>;
   categoriesByUser?: Maybe<Array<Category>>;
+  locationsByUser?: Maybe<Array<Location>>;
+  tagsByUser?: Maybe<Array<Tag>>;
 };
 
 
@@ -99,6 +101,16 @@ export type QueryTagsArgs = {
 
 
 export type QueryCategoriesByUserArgs = {
+  ownerId?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryLocationsByUserArgs = {
+  ownerId?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryTagsByUserArgs = {
   ownerId?: Maybe<Scalars['Int']>;
 };
 
@@ -1495,6 +1507,32 @@ export type GetUserCategoriesQuery = (
   )>> }
 );
 
+export type GetUserLocationsQueryVariables = {
+  ownerId?: Maybe<Scalars['Int']>;
+};
+
+
+export type GetUserLocationsQuery = (
+  { __typename?: 'Query' }
+  & { locationsByUser?: Maybe<Array<(
+    { __typename?: 'Location' }
+    & Pick<Location, 'id' | 'title'>
+  )>> }
+);
+
+export type GetUserTagsQueryVariables = {
+  ownerId?: Maybe<Scalars['Int']>;
+};
+
+
+export type GetUserTagsQuery = (
+  { __typename?: 'Query' }
+  & { tagsByUser?: Maybe<Array<(
+    { __typename?: 'Tag' }
+    & Pick<Tag, 'id' | 'title'>
+  )>> }
+);
+
 export type UpdateItemMutationVariables = {
   data: ItemUpdateInput;
   where: ItemWhereUniqueInput;
@@ -1707,6 +1745,74 @@ export function useGetUserCategoriesLazyQuery(baseOptions?: ApolloReactHooks.Laz
 export type GetUserCategoriesQueryHookResult = ReturnType<typeof useGetUserCategoriesQuery>;
 export type GetUserCategoriesLazyQueryHookResult = ReturnType<typeof useGetUserCategoriesLazyQuery>;
 export type GetUserCategoriesQueryResult = ApolloReactCommon.QueryResult<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>;
+export const GetUserLocationsDocument = gql`
+    query getUserLocations($ownerId: Int) {
+  locationsByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+    `;
+
+/**
+ * __useGetUserLocationsQuery__
+ *
+ * To run a query within a React component, call `useGetUserLocationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserLocationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserLocationsQuery({
+ *   variables: {
+ *      ownerId: // value for 'ownerId'
+ *   },
+ * });
+ */
+export function useGetUserLocationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetUserLocationsQuery, GetUserLocationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetUserLocationsQuery, GetUserLocationsQueryVariables>(GetUserLocationsDocument, baseOptions);
+      }
+export function useGetUserLocationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUserLocationsQuery, GetUserLocationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetUserLocationsQuery, GetUserLocationsQueryVariables>(GetUserLocationsDocument, baseOptions);
+        }
+export type GetUserLocationsQueryHookResult = ReturnType<typeof useGetUserLocationsQuery>;
+export type GetUserLocationsLazyQueryHookResult = ReturnType<typeof useGetUserLocationsLazyQuery>;
+export type GetUserLocationsQueryResult = ApolloReactCommon.QueryResult<GetUserLocationsQuery, GetUserLocationsQueryVariables>;
+export const GetUserTagsDocument = gql`
+    query getUserTags($ownerId: Int) {
+  tagsByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+    `;
+
+/**
+ * __useGetUserTagsQuery__
+ *
+ * To run a query within a React component, call `useGetUserTagsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserTagsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserTagsQuery({
+ *   variables: {
+ *      ownerId: // value for 'ownerId'
+ *   },
+ * });
+ */
+export function useGetUserTagsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetUserTagsQuery, GetUserTagsQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetUserTagsQuery, GetUserTagsQueryVariables>(GetUserTagsDocument, baseOptions);
+      }
+export function useGetUserTagsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUserTagsQuery, GetUserTagsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetUserTagsQuery, GetUserTagsQueryVariables>(GetUserTagsDocument, baseOptions);
+        }
+export type GetUserTagsQueryHookResult = ReturnType<typeof useGetUserTagsQuery>;
+export type GetUserTagsLazyQueryHookResult = ReturnType<typeof useGetUserTagsLazyQuery>;
+export type GetUserTagsQueryResult = ApolloReactCommon.QueryResult<GetUserTagsQuery, GetUserTagsQueryVariables>;
 export const UpdateItemDocument = gql`
     mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
   updateOneItem(data: $data, where: $where) {
