@@ -1,37 +1,8 @@
 import React, { useState } from 'react';
-import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
-import { GetItemQuery, GetItemQueryVariables } from '../generated/graphql';
+import { GetItemDocument, GetItemQuery, GetItemQueryVariables } from '../generated/graphql';
 import UpdateItem from './UpdateItem';
-
-const GET_ITEM = gql`
-  query getItem($where: ItemWhereUniqueInput!) {
-    item(where: $where) {
-      id
-      description
-      model
-      categories {
-        id
-        title
-      }
-      locations {
-        id
-        title
-      }
-      spark
-      count
-      monetaryValue
-      link
-      notes
-      tags {
-        id
-        title
-      }
-      image
-    }
-  }
-`;
 
 interface ViewItemProps extends RouteComponentProps {
   itemId?: string;
@@ -40,7 +11,7 @@ interface ViewItemProps extends RouteComponentProps {
 export default function ViewItem(props: ViewItemProps) {
   const [underEdit, setUnderEdit] = useState(false);
 
-  const { loading, error, data } = useQuery<GetItemQuery, GetItemQueryVariables>(GET_ITEM, {
+  const { loading, error, data } = useQuery<GetItemQuery, GetItemQueryVariables>(GetItemDocument, {
     variables: { where: { id: props.itemId ? parseInt(props.itemId) : null } },
   });
 

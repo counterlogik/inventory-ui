@@ -1,0 +1,11 @@
+query getCategories {
+  categories {
+    id
+    title
+    description
+    image
+    items {
+      id
+    }
+  }
+}

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
 import {
@@ -18,57 +17,6 @@ import {
 } from '../generated/graphql';
 import { ItemIdTitleCompoundVariables } from '../interfaces/helper-interfaces';
 import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
-
-const GET_USER_CATEGORIES = gql`
-  query getUserCategories($ownerId: Int) {
-    categoriesByUser(ownerId: $ownerId) {
-      id
-      title
-    }
-  }
-`;
-
-const GET_USER_LOCATIONS = gql`
-  query getUserLocations($ownerId: Int) {
-    locationsByUser(ownerId: $ownerId) {
-      id
-      title
-    }
-  }
-`;
-
-const GET_USER_TAGS = gql`
-  query getUserTags($ownerId: Int) {
-    tagsByUser(ownerId: $ownerId) {
-      id
-      title
-    }
-  }
-`;
-
-const UPDATE_ITEM = gql`
-  mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
-    updateOneItem(data: $data, where: $where) {
-      id
-      owner {
-        email
-      }
-      description
-      model
-      spark
-      count
-      monetaryValue
-      link
-      notes
-      image
-      categories {
-        id
-        title
-        ownerId
-      }
-    }
-  }
-`;
 
 interface UpdateItemProps {
   id: number;
@@ -229,7 +177,8 @@ export default function UpdateItem(props: UpdateItemProps): React.ReactElement<U
           <label htmlFor='image'>image</label>
           <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
         </p>
-
+        {userCatgoriesLoading && <p>loading...</p>}
+        {userCatgoriesError && <p>error. please try again</p>}
         <ChipsCollectionInput
           existingEntryOptions={userCategoriesData?.categoriesByUser as ItemIdTitleCompoundVariables[]}
           selectedEntries={categories}
@@ -243,7 +192,36 @@ export default function UpdateItem(props: UpdateItemProps): React.ReactElement<U
             ) => {}
           }
         />
-
+        {userLocationsLoading && <p>loading...</p>}
+        {userLocationsError && <p>error. please try again</p>}
+        <ChipsCollectionInput
+          existingEntryOptions={userLocationsData?.locationsByUser as ItemIdTitleCompoundVariables[]}
+          selectedEntries={locations}
+          disconnectEntries={disconnectLocations}
+          setSelectedEntries={setLocations as (value: React.SetStateAction<ItemIdTitleCompoundVariables[]>) => {}}
+          setDisconnectEntries={
+            setDisconnectLocations as (
+              value:
+                | React.Dispatch<React.SetStateAction<ItemIdTitleCompoundVariables[]>>
+                | ItemIdTitleCompoundVariables[],
+            ) => {}
+          }
+        />
+        {userTagsLoading && <p>loading...</p>}
+        {userTagsError && <p>error. please try again</p>}
+        <ChipsCollectionInput
+          existingEntryOptions={userTagsData?.tagsByUser as ItemIdTitleCompoundVariables[]}
+          selectedEntries={tags}
+          disconnectEntries={disconnectTags}
+          setSelectedEntries={setTags as (value: React.SetStateAction<ItemIdTitleCompoundVariables[]>) => {}}
+          setDisconnectEntries={
+            setDisconnectTags as (
+              value:
+                | React.Dispatch<React.SetStateAction<ItemIdTitleCompoundVariables[]>>
+                | ItemIdTitleCompoundVariables[],
+            ) => {}
+          }
+        />
         <p>{locations.length && JSON.stringify(locations)}</p>
         <p>{disconnectLocations.length && JSON.stringify(disconnectLocations)}</p>
         <p>{tags.length && JSON.stringify(tags)}</p>

@@ -1,27 +1,7 @@
 import React, { useState } from 'react';
-import { gql } from 'apollo-boost';
 import { useMutation } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
 import { AddItemDocument, AddItemMutation, AddItemMutationVariables } from '../generated/graphql';
-
-const ADD_ITEM = gql`
-  mutation AddItem($data: ItemCreateInput!) {
-    createOneItem(data: $data) {
-      id
-      owner {
-        email
-      }
-      description
-      model
-      spark
-      count
-      monetaryValue
-      link
-      notes
-      image
-    }
-  }
-`;
 
 export default function AddItem(props: RouteComponentProps) {
   const [description, setDescription] = useState('');

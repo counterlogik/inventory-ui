@@ -1,0 +1,16 @@
+mutation AddItem($data: ItemCreateInput!) {
+  createOneItem(data: $data) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+  }
+}
