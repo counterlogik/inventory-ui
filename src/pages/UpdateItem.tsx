@@ -104,6 +104,90 @@ export default function UpdateItem(props: UpdateItemProps): React.ReactElement<U
               ],
             }),
           },
+          locations: {
+            ...(locations.filter((location) => location.id).length && {
+              connect: [
+                ...locations
+                  .filter((location) => location.id)
+                  .map((existingLocation) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingLocation.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectLocations.length && {
+              disconnect: [
+                ...disconnectLocations.map((disconnectLocation) => {
+                  return {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: 1,
+                      title: disconnectLocation.title,
+                    },
+                  };
+                }),
+              ],
+            }),
+            ...(locations.filter((location) => !location.id).length && {
+              create: [
+                ...locations
+                  .filter((location) => !location.id)
+                  .map((newLocationPlaceholder) => {
+                    return {
+                      title: newLocationPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+          tags: {
+            ...(tags.filter((tag) => tag.id).length && {
+              connect: [
+                ...tags
+                  .filter((tag) => tag.id)
+                  .map((existingTag) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingTag.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectTags.length && {
+              disconnect: [
+                ...disconnectTags.map((disconnectTag) => {
+                  return {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: 1,
+                      title: disconnectTag.title,
+                    },
+                  };
+                }),
+              ],
+            }),
+            ...(tags.filter((tag) => !tag.id).length && {
+              create: [
+                ...tags
+                  .filter((tag) => !tag.id)
+                  .map((newTagPlaceholder) => {
+                    return {
+                      title: newTagPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
         },
         where: {
           id,

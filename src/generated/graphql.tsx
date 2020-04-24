@@ -1480,17 +1480,7 @@ export type GetItemsQuery = (
   { __typename?: 'Query' }
   & { items: Array<(
     { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { categories: Array<(
-      { __typename?: 'Category' }
-      & Pick<Category, 'id' | 'title'>
-    )>, locations: Array<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'title'>
-    )>, tags: Array<(
-      { __typename?: 'Tag' }
-      & Pick<Tag, 'id' | 'title'>
-    )> }
+    & Pick<Item, 'id' | 'description' | 'model'>
   )> }
 );
 
@@ -1665,24 +1655,6 @@ export const GetItemsDocument = gql`
     id
     description
     model
-    categories {
-      id
-      title
-    }
-    locations {
-      id
-      title
-    }
-    spark
-    count
-    monetaryValue
-    link
-    notes
-    tags {
-      id
-      title
-    }
-    image
   }
 }
     `;

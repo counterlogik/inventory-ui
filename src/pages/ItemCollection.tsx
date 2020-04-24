@@ -11,10 +11,10 @@ export default function ItemCollection(props: RouteComponentProps) {
 
   return (
     <>
-      {data!.items.map((item: Pick<Item, 'id' | 'description'>) => {
+      {data!.items.map((item: Pick<Item, 'id' | 'description' | 'model'>) => {
         return (
           <p key={item.id}>
-            {item.id} {item.description}
+            {item.id} {item.model} {item.description}
           </p>
         );
       })}

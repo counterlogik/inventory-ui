@@ -3,23 +3,5 @@ query getItems {
     id
     description
     model
-    categories {
-      id
-      title
-    }
-    locations {
-      id
-      title
-    }
-    spark
-    count
-    monetaryValue
-    link
-    notes
-    tags {
-      id
-      title
-    }
-    image
   }
 }
