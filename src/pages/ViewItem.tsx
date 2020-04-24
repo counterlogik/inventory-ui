@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
 import { GetItemDocument, GetItemQuery, GetItemQueryVariables, Item } from '../generated/graphql';
-import UpdateItem from './ItemForm';
+import { UpdateItem } from './ItemForm';
 
 interface ViewItemProps extends RouteComponentProps {
   itemId?: string;

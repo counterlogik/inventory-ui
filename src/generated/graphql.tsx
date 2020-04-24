@@ -1449,6 +1449,34 @@ export type ItemUpdateInput = {
   tags?: Maybe<TagUpdateManyWithoutItemsInput>;
 };
 
+export type UpsertItemMutationVariables = {
+  update: ItemUpdateInput;
+  where: ItemWhereUniqueInput;
+  create: ItemCreateInput;
+};
+
+
+export type UpsertItemMutation = (
+  { __typename?: 'Mutation' }
+  & { upsertOneItem: (
+    { __typename?: 'Item' }
+    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: (
+      { __typename?: 'User' }
+      & Pick<User, 'email'>
+    ), categories: Array<(
+      { __typename?: 'Category' }
+      & Pick<Category, 'id' | 'title' | 'ownerId'>
+    )>, locations: Array<(
+      { __typename?: 'Location' }
+      & Pick<Location, 'id' | 'title' | 'ownerId'>
+    )>, tags: Array<(
+      { __typename?: 'Tag' }
+      & Pick<Tag, 'id' | 'title' | 'ownerId'>
+    )> }
+  ) }
+);
+
 export type GetCategoriesQueryVariables = {};
 
 
@@ -1559,9 +1587,9 @@ export type UpdateItemMutation = (
 );
 
 export type AddOrUpdateItemMutationVariables = {
-  update: ItemUpdateInput;
   where: ItemWhereUniqueInput;
   create: ItemCreateInput;
+  update: ItemUpdateInput;
 };
 
 
@@ -1613,6 +1641,66 @@ export type GetItemQuery = (
 );
 
 
+export const UpsertItemDocument = gql`
+    mutation UpsertItem($update: ItemUpdateInput!, $where: ItemWhereUniqueInput!, $create: ItemCreateInput!) {
+  upsertOneItem(update: $update, where: $where, create: $create) {
+    id
+    owner {
+      email
+    }
+    description
+    model
+    spark
+    count
+    monetaryValue
+    link
+    notes
+    image
+    categories {
+      id
+      title
+      ownerId
+    }
+    locations {
+      id
+      title
+      ownerId
+    }
+    tags {
+      id
+      title
+      ownerId
+    }
+  }
+}
+    `;
+export type UpsertItemMutationFn = ApolloReactCommon.MutationFunction<UpsertItemMutation, UpsertItemMutationVariables>;
+
+/**
+ * __useUpsertItemMutation__
+ *
+ * To run a mutation, you first call `useUpsertItemMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertItemMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertItemMutation, { data, loading, error }] = useUpsertItemMutation({
+ *   variables: {
+ *      update: // value for 'update'
+ *      where: // value for 'where'
+ *      create: // value for 'create'
+ *   },
+ * });
+ */
+export function useUpsertItemMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpsertItemMutation, UpsertItemMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpsertItemMutation, UpsertItemMutationVariables>(UpsertItemDocument, baseOptions);
+      }
+export type UpsertItemMutationHookResult = ReturnType<typeof useUpsertItemMutation>;
+export type UpsertItemMutationResult = ApolloReactCommon.MutationResult<UpsertItemMutation>;
+export type UpsertItemMutationOptions = ApolloReactCommon.BaseMutationOptions<UpsertItemMutation, UpsertItemMutationVariables>;
 export const GetCategoriesDocument = gql`
     query getCategories {
   categories {
@@ -1890,8 +1978,8 @@ export type UpdateItemMutationHookResult = ReturnType<typeof useUpdateItemMutati
 export type UpdateItemMutationResult = ApolloReactCommon.MutationResult<UpdateItemMutation>;
 export type UpdateItemMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateItemMutation, UpdateItemMutationVariables>;
 export const AddOrUpdateItemDocument = gql`
-    mutation AddOrUpdateItem($update: ItemUpdateInput!, $where: ItemWhereUniqueInput!, $create: ItemCreateInput!) {
-  upsertOneItem(update: $update, where: $where, create: $create) {
+    mutation AddOrUpdateItem($where: ItemWhereUniqueInput!, $create: ItemCreateInput!, $update: ItemUpdateInput!) {
+  upsertOneItem(where: $where, create: $create, update: $update) {
     id
     owner {
       email
@@ -1937,9 +2025,9 @@ export type AddOrUpdateItemMutationFn = ApolloReactCommon.MutationFunction<AddOr
  * @example
  * const [addOrUpdateItemMutation, { data, loading, error }] = useAddOrUpdateItemMutation({
  *   variables: {
- *      update: // value for 'update'
  *      where: // value for 'where'
  *      create: // value for 'create'
+ *      update: // value for 'update'
  *   },
  * });
  */

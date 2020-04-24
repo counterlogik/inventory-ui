@@ -68,8 +68,8 @@ mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
   }
 }
 
-mutation AddOrUpdateItem($update: ItemUpdateInput!, $where: ItemWhereUniqueInput!, $create: ItemCreateInput!) {
-  upsertOneItem(update: $update, where: $where, create: $create) {
+mutation AddOrUpdateItem($where: ItemWhereUniqueInput!, $create: ItemCreateInput!, $update: ItemUpdateInput!) {
+  upsertOneItem(where: $where, create: $create, update: $update) {
     id
     owner {
       email

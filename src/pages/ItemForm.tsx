@@ -3,9 +3,9 @@ import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
 import {
-  UpdateItemDocument,
-  UpdateItemMutation,
-  UpdateItemMutationVariables,
+  UpsertItemDocument,
+  UpsertItemMutationVariables,
+  UpsertItemMutation,
   GetUserCategoriesQuery,
   GetUserCategoriesQueryVariables,
   GetUserCategoriesDocument,
@@ -16,7 +16,6 @@ import {
   GetUserTagsQueryVariables,
   GetUserTagsDocument,
   Item,
-  UserUpdateOneRequiredWithoutTagsInput,
 } from '../generated/graphql';
 import { ItemIdTitleCompoundVariables } from '../interfaces/helper-interfaces';
 import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
@@ -58,152 +57,288 @@ export default function ItemForm({
   const [disconnectLocations, setDisconnectLocations] = useState<ItemIdTitleCompoundVariables[]>([]);
   const [disconnectTags, setDisconnectTags] = useState<ItemIdTitleCompoundVariables[]>([]);
 
-  const [addOrUpdateItem, { loading, error }] = useMutation<
-    UserUpdateOneRequiredWithoutTagsInput,
-    UpdateItemMutationVariables
-  >(UpdateItemDocument, {
-    variables: {
-      data: {
-        id,
-        description,
-        model,
-        count,
-        monetaryValue,
-        link,
-        notes,
-        image,
-        categories: {
-          ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
-            connect: [
-              ...currentCategories
-                .filter((currentCategory) => currentCategory.id)
-                .map((existingCategory) => {
+  const [addOrUpdateItem, { loading, error }] = useMutation<UpsertItemMutation, UpsertItemMutationVariables>(
+    UpsertItemDocument,
+    {
+      variables: {
+        create: {
+          owner: { connect: { id: 1 } },
+          description,
+          model,
+          count,
+          monetaryValue,
+          link,
+          notes,
+          image,
+          categories: {
+            ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
+              connect: [
+                ...currentCategories
+                  .filter((currentCategory) => currentCategory.id)
+                  .map((existingCategory) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingCategory.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectCategories.length && {
+              disconnect: [
+                ...disconnectCategories.map((disconnectCategory) => {
                   return {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     ownerId_title: {
                       ownerId: 1,
-                      title: existingCategory.title,
+                      title: disconnectCategory.title,
                     },
                   };
                 }),
-            ],
-          }),
-          ...(disconnectCategories.length && {
-            disconnect: [
-              ...disconnectCategories.map((disconnectCategory) => {
-                return {
-                  // eslint-disable-next-line @typescript-eslint/camelcase
-                  ownerId_title: {
-                    ownerId: 1,
-                    title: disconnectCategory.title,
-                  },
-                };
-              }),
-            ],
-          }),
-          ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
-            create: [
-              ...currentCategories
-                .filter((currentCategory) => !currentCategory.id)
-                .map((newCategoryPlaceholder) => {
-                  return {
-                    title: newCategoryPlaceholder.title,
-                    owner: { connect: { id: 1 } },
-                  };
-                }),
-            ],
-          }),
-        },
-        locations: {
-          ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
-            connect: [
-              ...currentLocations
-                .filter((currentLocation) => currentLocation.id)
-                .map((existingLocation) => {
+              ],
+            }),
+            ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
+              create: [
+                ...currentCategories
+                  .filter((currentCategory) => !currentCategory.id)
+                  .map((newCategoryPlaceholder) => {
+                    return {
+                      title: newCategoryPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+          locations: {
+            ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
+              connect: [
+                ...currentLocations
+                  .filter((currentLocation) => currentLocation.id)
+                  .map((existingLocation) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingLocation.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectLocations.length && {
+              disconnect: [
+                ...disconnectLocations.map((disconnectLocation) => {
                   return {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     ownerId_title: {
                       ownerId: 1,
-                      title: existingLocation.title,
+                      title: disconnectLocation.title,
                     },
                   };
                 }),
-            ],
-          }),
-          ...(disconnectLocations.length && {
-            disconnect: [
-              ...disconnectLocations.map((disconnectLocation) => {
-                return {
-                  // eslint-disable-next-line @typescript-eslint/camelcase
-                  ownerId_title: {
-                    ownerId: 1,
-                    title: disconnectLocation.title,
-                  },
-                };
-              }),
-            ],
-          }),
-          ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
-            create: [
-              ...currentLocations
-                .filter((currentLocation) => !currentLocation.id)
-                .map((newLocationPlaceholder) => {
-                  return {
-                    title: newLocationPlaceholder.title,
-                    owner: { connect: { id: 1 } },
-                  };
-                }),
-            ],
-          }),
-        },
-        tags: {
-          ...(currentTags.filter((currentTag) => currentTag.id).length && {
-            connect: [
-              ...currentTags
-                .filter((currentTag) => currentTag.id)
-                .map((existingTag) => {
+              ],
+            }),
+            ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
+              create: [
+                ...currentLocations
+                  .filter((currentLocation) => !currentLocation.id)
+                  .map((newLocationPlaceholder) => {
+                    return {
+                      title: newLocationPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+          tags: {
+            ...(currentTags.filter((currentTag) => currentTag.id).length && {
+              connect: [
+                ...currentTags
+                  .filter((currentTag) => currentTag.id)
+                  .map((existingTag) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingTag.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectTags.length && {
+              disconnect: [
+                ...disconnectTags.map((disconnectTag) => {
                   return {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     ownerId_title: {
                       ownerId: 1,
-                      title: existingTag.title,
+                      title: disconnectTag.title,
                     },
                   };
                 }),
-            ],
-          }),
-          ...(disconnectTags.length && {
-            disconnect: [
-              ...disconnectTags.map((disconnectTag) => {
-                return {
-                  // eslint-disable-next-line @typescript-eslint/camelcase
-                  ownerId_title: {
-                    ownerId: 1,
-                    title: disconnectTag.title,
-                  },
-                };
-              }),
-            ],
-          }),
-          ...(currentTags.filter((currentTag) => !currentTag.id).length && {
-            create: [
-              ...currentTags
-                .filter((currentTag) => !currentTag.id)
-                .map((newTagPlaceholder) => {
+              ],
+            }),
+            ...(currentTags.filter((currentTag) => !currentTag.id).length && {
+              create: [
+                ...currentTags
+                  .filter((currentTag) => !currentTag.id)
+                  .map((newTagPlaceholder) => {
+                    return {
+                      title: newTagPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+        },
+        where: {
+          id,
+        },
+        update: {
+          owner: { connect: { id: 1 } },
+          description,
+          model,
+          count,
+          monetaryValue,
+          link,
+          notes,
+          image,
+          categories: {
+            ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
+              connect: [
+                ...currentCategories
+                  .filter((currentCategory) => currentCategory.id)
+                  .map((existingCategory) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingCategory.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectCategories.length && {
+              disconnect: [
+                ...disconnectCategories.map((disconnectCategory) => {
                   return {
-                    title: newTagPlaceholder.title,
-                    owner: { connect: { id: 1 } },
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: 1,
+                      title: disconnectCategory.title,
+                    },
                   };
                 }),
-            ],
-          }),
+              ],
+            }),
+            ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
+              create: [
+                ...currentCategories
+                  .filter((currentCategory) => !currentCategory.id)
+                  .map((newCategoryPlaceholder) => {
+                    return {
+                      title: newCategoryPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+          locations: {
+            ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
+              connect: [
+                ...currentLocations
+                  .filter((currentLocation) => currentLocation.id)
+                  .map((existingLocation) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingLocation.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectLocations.length && {
+              disconnect: [
+                ...disconnectLocations.map((disconnectLocation) => {
+                  return {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: 1,
+                      title: disconnectLocation.title,
+                    },
+                  };
+                }),
+              ],
+            }),
+            ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
+              create: [
+                ...currentLocations
+                  .filter((currentLocation) => !currentLocation.id)
+                  .map((newLocationPlaceholder) => {
+                    return {
+                      title: newLocationPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
+          tags: {
+            ...(currentTags.filter((currentTag) => currentTag.id).length && {
+              connect: [
+                ...currentTags
+                  .filter((currentTag) => currentTag.id)
+                  .map((existingTag) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingTag.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectTags.length && {
+              disconnect: [
+                ...disconnectTags.map((disconnectTag) => {
+                  return {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: 1,
+                      title: disconnectTag.title,
+                    },
+                  };
+                }),
+              ],
+            }),
+            ...(currentTags.filter((currentTag) => !currentTag.id).length && {
+              create: [
+                ...currentTags
+                  .filter((currentTag) => !currentTag.id)
+                  .map((newTagPlaceholder) => {
+                    return {
+                      title: newTagPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
+          },
         },
-      },
-      where: {
-        id,
       },
     },
-  });
+  );
 
   const { loading: userCatgoriesLoading, error: userCatgoriesError, data: userCategoriesData } = useQuery<
     GetUserCategoriesQuery,
@@ -237,7 +372,7 @@ export default function ItemForm({
         onSubmit={async (event) => {
           event.preventDefault();
           if (!description) return;
-          await updateItem();
+          await addOrUpdateItem();
           removeUnderEdit();
         }}
       >
