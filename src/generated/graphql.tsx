@@ -24,6 +24,7 @@ export type Query = {
   categories: Array<Category>;
   tag?: Maybe<Tag>;
   tags: Array<Tag>;
+  categoriesByUser?: Maybe<Array<Category>>;
 };
 
 
@@ -94,6 +95,11 @@ export type QueryTagsArgs = {
   before?: Maybe<TagWhereUniqueInput>;
   first?: Maybe<Scalars['Int']>;
   last?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryCategoriesByUserArgs = {
+  ownerId?: Maybe<Scalars['Int']>;
 };
 
 export type UserWhereUniqueInput = {
@@ -1476,6 +1482,19 @@ export type GetItemsQuery = (
   )> }
 );
 
+export type GetUserCategoriesQueryVariables = {
+  ownerId?: Maybe<Scalars['Int']>;
+};
+
+
+export type GetUserCategoriesQuery = (
+  { __typename?: 'Query' }
+  & { categoriesByUser?: Maybe<Array<(
+    { __typename?: 'Category' }
+    & Pick<Category, 'id' | 'title'>
+  )>> }
+);
+
 export type UpdateItemMutationVariables = {
   data: ItemUpdateInput;
   where: ItemWhereUniqueInput;
@@ -1651,6 +1670,40 @@ export function useGetItemsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type GetItemsQueryHookResult = ReturnType<typeof useGetItemsQuery>;
 export type GetItemsLazyQueryHookResult = ReturnType<typeof useGetItemsLazyQuery>;
 export type GetItemsQueryResult = ApolloReactCommon.QueryResult<GetItemsQuery, GetItemsQueryVariables>;
+export const GetUserCategoriesDocument = gql`
+    query getUserCategories($ownerId: Int) {
+  categoriesByUser(ownerId: $ownerId) {
+    id
+    title
+  }
+}
+    `;
+
+/**
+ * __useGetUserCategoriesQuery__
+ *
+ * To run a query within a React component, call `useGetUserCategoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserCategoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserCategoriesQuery({
+ *   variables: {
+ *      ownerId: // value for 'ownerId'
+ *   },
+ * });
+ */
+export function useGetUserCategoriesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>) {
+        return ApolloReactHooks.useQuery<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>(GetUserCategoriesDocument, baseOptions);
+      }
+export function useGetUserCategoriesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>(GetUserCategoriesDocument, baseOptions);
+        }
+export type GetUserCategoriesQueryHookResult = ReturnType<typeof useGetUserCategoriesQuery>;
+export type GetUserCategoriesLazyQueryHookResult = ReturnType<typeof useGetUserCategoriesLazyQuery>;
+export type GetUserCategoriesQueryResult = ApolloReactCommon.QueryResult<GetUserCategoriesQuery, GetUserCategoriesQueryVariables>;
 export const UpdateItemDocument = gql`
     mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
   updateOneItem(data: $data, where: $where) {

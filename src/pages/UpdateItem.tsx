@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { gql } from 'apollo-boost';
-import { useMutation, useQuery } from '@apollo/react-hooks';
-import { RouteComponentProps, Link } from '@reach/router';
+import { useQuery } from '@apollo/react-hooks';
+import { useMutation } from '@apollo/react-hooks';
 import {
-  GetItemDocument,
-  GetItemQuery,
-  GetItemQueryVariables,
   UpdateItemDocument,
   UpdateItemMutation,
   UpdateItemMutationVariables,
-  Item,
+  GetUserCategoriesQuery,
+  GetUserCategoriesQueryVariables,
+  GetUserCategoriesDocument,
+  Category,
 } from '../generated/graphql';
+
+const GET_USER_CATEGORIES = gql`
+  query getUserCategories($ownerId: Int) {
+    categoriesByUser(ownerId: $ownerId) {
+      id
+      title
+    }
+  }
+`;
 
 const UPDATE_ITEM = gql`
   mutation UpdateItem($data: ItemUpdateInput!, $where: ItemWhereUniqueInput!) {
@@ -40,6 +49,7 @@ interface UpdateItemProps {
   link: string | null | undefined;
   notes: string | null | undefined;
   image: string | null | undefined;
+  categories: Pick<Category, 'id' | 'title'>[];
   removeUnderEdit: () => void;
 }
 
@@ -52,6 +62,7 @@ export default function UpdateItem(itemData: UpdateItemProps) {
   const [link, setLink] = useState(itemData.link || '');
   const [notes, setNotes] = useState(itemData.notes || '');
   const [image, setImage] = useState(itemData.image || '');
+  const [categories, setCategories] = useState(itemData.categories || []);
 
   const [updateItem, { loading, error }] = useMutation<UpdateItemMutation, UpdateItemMutationVariables>(
     UpdateItemDocument,
@@ -73,6 +84,13 @@ export default function UpdateItem(itemData: UpdateItemProps) {
       },
     },
   );
+
+  const { loading: userCatgoriesLoading, error: userCatgoriesError, data } = useQuery<
+    GetUserCategoriesQuery,
+    GetUserCategoriesQueryVariables
+  >(GetUserCategoriesDocument, {
+    variables: { ownerId: id },
+  });
 
   return (
     <div>
@@ -117,6 +135,10 @@ export default function UpdateItem(itemData: UpdateItemProps) {
         <p>
           <label htmlFor='image'>image</label>
           <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
+        </p>
+        <p>
+          <label htmlFor='categories'>categories</label>
+          <input name='categories' defaultValue={JSON.stringify(categories)} onChange={(e) => console.log(e)} />
         </p>
         <button type='submit'>update item</button>
       </form>
