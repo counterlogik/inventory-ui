@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
+import Chip from '@material-ui/core/Chip';
+import RemoveIcon from '@material-ui/icons/RemoveCircleOutlineSharp';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import TextField from '@material-ui/core/TextField';
+
 import {
   UpdateItemDocument,
   UpdateItemMutation,
@@ -85,11 +90,11 @@ export default function UpdateItem(itemData: UpdateItemProps) {
     },
   );
 
-  const { loading: userCatgoriesLoading, error: userCatgoriesError, data } = useQuery<
+  const { loading: userCatgoriesLoading, error: userCatgoriesError, data: userCategoriesData } = useQuery<
     GetUserCategoriesQuery,
     GetUserCategoriesQueryVariables
   >(GetUserCategoriesDocument, {
-    variables: { ownerId: id },
+    variables: { ownerId: 1 },
   });
 
   return (
@@ -136,10 +141,61 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           <label htmlFor='image'>image</label>
           <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
         </p>
-        <p>
-          <label htmlFor='categories'>categories</label>
-          <input name='categories' defaultValue={JSON.stringify(categories)} onChange={(e) => console.log(e)} />
-        </p>
+
+        <Autocomplete
+          multiple
+          id='tags-filled'
+          filterSelectedOptions
+          options={userCategoriesData?.categoriesByUser?.map((category) => category.title) || []}
+          value={categories.map((category) => category.title)}
+          freeSolo
+          renderTags={(connectedEntries, getTagProps) =>
+            connectedEntries.map((connectedEntry, index) => (
+              <Chip
+                variant='outlined'
+                label={connectedEntry}
+                {...getTagProps({ index })}
+                deleteIcon={<RemoveIcon />}
+                onDelete={(event) => {
+                  event.stopPropagation();
+                  const oneEntryLess = connectedEntries.filter((entry) => entry !== connectedEntry);
+                  const newCategories = [...categories.filter((category) => oneEntryLess.includes(category.title))];
+                  setCategories(newCategories);
+                  console.log(newCategories);
+                }}
+              />
+            ))
+          }
+          renderInput={(params) => <TextField {...params} variant='filled' />}
+          onChange={(event, value: string[], reason: string) => {
+            event.preventDefault();
+            const appendCategoryTitle = value.splice(-1)[0];
+
+            if (reason === 'create-option') {
+              setCategories([...categories, { id: 0, title: appendCategoryTitle } as Pick<Category, 'id' | 'title'>]);
+            } else if (reason === 'select-option') {
+              console.log(userCategoriesData?.categoriesByUser);
+
+              const userCategoryMatch =
+                userCategoriesData?.categoriesByUser &&
+                userCategoriesData?.categoriesByUser.find(
+                  (categoryByUser) => categoryByUser.title === appendCategoryTitle,
+                );
+              if (userCategoryMatch) {
+                setCategories([...categories, userCategoryMatch as Pick<Category, 'id' | 'title'>]);
+              } else {
+                setCategories([
+                  ...categories,
+                  {
+                    id: 0,
+                    title: appendCategoryTitle,
+                  } as Pick<Category, 'id' | 'title'>,
+                ]);
+              }
+            }
+          }}
+        />
+        <p>{JSON.stringify(categories)}</p>
         <button type='submit'>update item</button>
       </form>
       {loading && <p>updating...</p>}
