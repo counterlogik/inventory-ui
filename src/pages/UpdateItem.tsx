@@ -82,6 +82,31 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           link,
           notes,
           image,
+          categories: {
+            create: [
+              ...categories
+                .filter((category) => !category.id)
+                .map((newCategoryPlaceholder) => {
+                  return {
+                    title: newCategoryPlaceholder.title,
+                    owner: { connect: { id: 1 } },
+                  };
+                }),
+            ],
+            connect: [
+              ...categories
+                .filter((category) => category.id)
+                .map((existingCategory) => {
+                  return {
+                    // eslint-disable-next-line @typescript-eslint/camelcase
+                    ownerId_title: {
+                      ownerId: existingCategory.id,
+                      title: existingCategory.title,
+                    },
+                  };
+                }),
+            ],
+          },
         },
         where: {
           id,
@@ -161,7 +186,6 @@ export default function UpdateItem(itemData: UpdateItemProps) {
                   const oneEntryLess = connectedEntries.filter((entry) => entry !== connectedEntry);
                   const newCategories = [...categories.filter((category) => oneEntryLess.includes(category.title))];
                   setCategories(newCategories);
-                  console.log(newCategories);
                 }}
               />
             ))
@@ -174,8 +198,6 @@ export default function UpdateItem(itemData: UpdateItemProps) {
             if (reason === 'create-option') {
               setCategories([...categories, { id: 0, title: appendCategoryTitle } as Pick<Category, 'id' | 'title'>]);
             } else if (reason === 'select-option') {
-              console.log(userCategoriesData?.categoriesByUser);
-
               const userCategoryMatch =
                 userCategoriesData?.categoriesByUser &&
                 userCategoriesData?.categoriesByUser.find(
