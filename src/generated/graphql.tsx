@@ -1553,8 +1553,11 @@ export type GetItemQuery = (
   { __typename?: 'Query' }
   & { item?: Maybe<(
     { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { categories: Array<(
+    & Pick<Item, 'id' | 'ownerId' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: (
+      { __typename?: 'User' }
+      & Pick<User, 'email'>
+    ), categories: Array<(
       { __typename?: 'Category' }
       & Pick<Category, 'id' | 'title'>
     )>, locations: Array<(
@@ -1838,6 +1841,10 @@ export const GetItemDocument = gql`
     query getItem($where: ItemWhereUniqueInput!) {
   item(where: $where) {
     id
+    owner {
+      email
+    }
+    ownerId
     description
     model
     categories {

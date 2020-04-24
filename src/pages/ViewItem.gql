@@ -1,6 +1,10 @@
 query getItem($where: ItemWhereUniqueInput!) {
   item(where: $where) {
     id
+    owner {
+      email
+    }
+    ownerId
     description
     model
     categories {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
-import { GetItemDocument, GetItemQuery, GetItemQueryVariables } from '../generated/graphql';
-import UpdateItem from './UpdateItem';
+import { GetItemDocument, GetItemQuery, GetItemQueryVariables, Item } from '../generated/graphql';
+import UpdateItem from './ItemForm';
 
 interface ViewItemProps extends RouteComponentProps {
   itemId?: string;
@@ -10,7 +10,6 @@ interface ViewItemProps extends RouteComponentProps {
 
 export default function ViewItem(props: ViewItemProps) {
   const [underEdit, setUnderEdit] = useState(false);
-
   const { loading, error, data } = useQuery<GetItemQuery, GetItemQueryVariables>(GetItemDocument, {
     variables: { where: { id: props.itemId ? parseInt(props.itemId) : null } },
   });
@@ -36,22 +35,7 @@ export default function ViewItem(props: ViewItemProps) {
           {data.item.tags?.length && <div className='detail'>{JSON.stringify(data.item.tags)}</div>}
         </div>
       ) : (
-        <UpdateItem
-          {...{
-            id: data.item.id,
-            description: data.item.description,
-            model: data.item.model,
-            count: data.item.count,
-            monetaryValue: data.item.monetaryValue,
-            link: data.item.link,
-            notes: data.item.notes,
-            image: data.item.image,
-            categories: data.item.categories,
-            locations: data.item.locations,
-            tags: data.item.tags,
-            removeUnderEdit: () => setUnderEdit(false),
-          }}
-        />
+        <UpdateItem item={data.item as Item} removeUnderEdit={() => setUnderEdit(false)} />
       )}
     </div>
   ) : (
