@@ -40,13 +40,13 @@ export default function ItemForm({
   removeUnderEdit,
 }: ItemFormProps): React.ReactElement<ItemFormProps> {
   const [simpleValues, setSimpleValues] = useState({
-    description: '',
-    model: '',
-    count: 1,
-    monetaryValue: 0,
-    link: '',
-    notes: '',
-    image: '',
+    description: description || '',
+    model: model || '',
+    count: count || 1,
+    monetaryValue: monetaryValue || 0,
+    link: link || '',
+    notes: notes || '',
+    image: image || '',
   });
 
   const [currentCategories, setCategories] = useState(categories || []);
@@ -198,7 +198,7 @@ export default function ItemForm({
           },
         },
         where: {
-          id,
+          id: id || 0, // This handles the addItem case when we load the form without an item id
         },
         update: {
           owner: { connect: { id: 1 } },
