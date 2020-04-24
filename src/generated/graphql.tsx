@@ -1509,7 +1509,10 @@ export type UpdateItemMutation = (
     & { owner: (
       { __typename?: 'User' }
       & Pick<User, 'email'>
-    ) }
+    ), categories: Array<(
+      { __typename?: 'Category' }
+      & Pick<Category, 'id' | 'title' | 'ownerId'>
+    )> }
   )> }
 );
 
@@ -1719,6 +1722,11 @@ export const UpdateItemDocument = gql`
     link
     notes
     image
+    categories {
+      id
+      title
+      ownerId
+    }
   }
 }
     `;

@@ -17,7 +17,6 @@
     "apollo-boost": "^0.4.7",
     "graphql": "^15.0.0",
     "graphql.macro": "^1.4.2",
-    "material-ui-chip-input": "^2.0.0-beta.2",
     "node-sass": "^4.13.1",
     "reach-router": "0.0.0",
     "react": "^16.13.1",
@@ -28,9 +27,9 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --no-cache",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --no-cache",
     "eject": "react-scripts eject",
     "lint": "npx eslint --fix '**/*.{js,jsx,ts,tsx}'",
     "format": "npx prettier --write '**/*.{css,html,graphql,gql,json,md,scss}'",

@@ -6,7 +6,6 @@ import Chip from '@material-ui/core/Chip';
 import RemoveIcon from '@material-ui/icons/RemoveCircleOutlineSharp';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
-
 import {
   UpdateItemDocument,
   UpdateItemMutation,
@@ -41,6 +40,11 @@ const UPDATE_ITEM = gql`
       link
       notes
       image
+      categories {
+        id
+        title
+        ownerId
+      }
     }
   }
 `;
@@ -58,6 +62,11 @@ interface UpdateItemProps {
   removeUnderEdit: () => void;
 }
 
+interface ItemIdTitleCompoundVariables {
+  id: number;
+  title: string;
+}
+
 export default function UpdateItem(itemData: UpdateItemProps) {
   const id = itemData.id;
   const [description, setDescription] = useState(itemData.description);
@@ -68,6 +77,7 @@ export default function UpdateItem(itemData: UpdateItemProps) {
   const [notes, setNotes] = useState(itemData.notes || '');
   const [image, setImage] = useState(itemData.image || '');
   const [categories, setCategories] = useState(itemData.categories || []);
+  const [disconnectCategories, setDisconnectCategories] = useState<ItemIdTitleCompoundVariables[]>([]);
 
   const [updateItem, { loading, error }] = useMutation<UpdateItemMutation, UpdateItemMutationVariables>(
     UpdateItemDocument,
@@ -83,29 +93,46 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           notes,
           image,
           categories: {
-            create: [
-              ...categories
-                .filter((category) => !category.id)
-                .map((newCategoryPlaceholder) => {
-                  return {
-                    title: newCategoryPlaceholder.title,
-                    owner: { connect: { id: 1 } },
-                  };
-                }),
-            ],
-            connect: [
-              ...categories
-                .filter((category) => category.id)
-                .map((existingCategory) => {
+            ...(categories.filter((category) => category.id).length && {
+              connect: [
+                ...categories
+                  .filter((category) => category.id)
+                  .map((existingCategory) => {
+                    return {
+                      // eslint-disable-next-line @typescript-eslint/camelcase
+                      ownerId_title: {
+                        ownerId: 1,
+                        title: existingCategory.title,
+                      },
+                    };
+                  }),
+              ],
+            }),
+            ...(disconnectCategories.length && {
+              disconnect: [
+                ...disconnectCategories.map((disconnectCategory) => {
                   return {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     ownerId_title: {
-                      ownerId: existingCategory.id,
-                      title: existingCategory.title,
+                      ownerId: 1,
+                      title: disconnectCategory.title,
                     },
                   };
                 }),
-            ],
+              ],
+            }),
+            ...(categories.filter((category) => !category.id).length && {
+              create: [
+                ...categories
+                  .filter((category) => !category.id)
+                  .map((newCategoryPlaceholder) => {
+                    return {
+                      title: newCategoryPlaceholder.title,
+                      owner: { connect: { id: 1 } },
+                    };
+                  }),
+              ],
+            }),
           },
         },
         where: {
@@ -127,10 +154,10 @@ export default function UpdateItem(itemData: UpdateItemProps) {
       <h3>update item: {id}</h3>
       <h5>description: {description}</h5>
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          updateItem();
-          itemData.removeUnderEdit();
+          await updateItem();
+          await itemData.removeUnderEdit();
         }}
       >
         <p>
@@ -166,7 +193,7 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           <label htmlFor='image'>image</label>
           <input name='image' defaultValue={image} onChange={(e) => setImage(e.target.value)} />
         </p>
-
+        // TODO: still need to deal with the cse of disconnecting removed entries
         <Autocomplete
           multiple
           id='tags-filled'
@@ -175,36 +202,60 @@ export default function UpdateItem(itemData: UpdateItemProps) {
           value={categories.map((category) => category.title)}
           freeSolo
           renderTags={(connectedEntries, getTagProps) =>
-            connectedEntries.map((connectedEntry, index) => (
+            connectedEntries.map((currentEntryTitle, index) => (
               <Chip
                 variant='outlined'
-                label={connectedEntry}
+                label={currentEntryTitle}
                 {...getTagProps({ index })}
                 deleteIcon={<RemoveIcon />}
                 onDelete={(event) => {
                   event.stopPropagation();
-                  const oneEntryLess = connectedEntries.filter((entry) => entry !== connectedEntry);
+                  const oneEntryLess = connectedEntries.filter((entryTitle) => entryTitle !== currentEntryTitle);
                   const newCategories = [...categories.filter((category) => oneEntryLess.includes(category.title))];
                   setCategories(newCategories);
+                  // if this is a category that currently exists in the database then set it for disconnection from this Item
+                  if (
+                    userCategoriesData?.categoriesByUser &&
+                    userCategoriesData?.categoriesByUser.find(
+                      (categoryByUser) => categoryByUser.title === currentEntryTitle,
+                    ) &&
+                    !disconnectCategories.find((disconnectCategory) => disconnectCategory.title === currentEntryTitle)
+                  ) {
+                    setDisconnectCategories([...disconnectCategories, { id: 1, title: currentEntryTitle }]);
+                  }
                 }}
               />
             ))
           }
           renderInput={(params) => <TextField {...params} variant='filled' />}
           onChange={(event, value: string[], reason: string) => {
+            // TODO: also need to handle case of category existing already for the use or in the current set to be written
             event.preventDefault();
             const appendCategoryTitle = value.splice(-1)[0];
 
-            if (reason === 'create-option') {
+            const categoryMatch = categories.map((category) => category.title).includes(appendCategoryTitle);
+
+            const userCategoryMatch =
+              userCategoriesData?.categoriesByUser &&
+              userCategoriesData?.categoriesByUser.find(
+                (categoryByUser) => categoryByUser.title === appendCategoryTitle,
+              );
+
+            if (reason === 'create-option' && !categoryMatch && !userCategoryMatch) {
               setCategories([...categories, { id: 0, title: appendCategoryTitle } as Pick<Category, 'id' | 'title'>]);
             } else if (reason === 'select-option') {
-              const userCategoryMatch =
-                userCategoriesData?.categoriesByUser &&
-                userCategoriesData?.categoriesByUser.find(
-                  (categoryByUser) => categoryByUser.title === appendCategoryTitle,
-                );
               if (userCategoryMatch) {
                 setCategories([...categories, userCategoryMatch as Pick<Category, 'id' | 'title'>]);
+                const inDisconnectCategories = disconnectCategories.find(
+                  (disconnectCategory) => disconnectCategory.title === appendCategoryTitle,
+                );
+                if (inDisconnectCategories) {
+                  setDisconnectCategories([
+                    ...disconnectCategories.filter(
+                      (disconnectCategory) => disconnectCategory.title !== appendCategoryTitle,
+                    ),
+                  ]);
+                }
               } else {
                 setCategories([
                   ...categories,
@@ -217,7 +268,7 @@ export default function UpdateItem(itemData: UpdateItemProps) {
             }
           }}
         />
-        <p>{JSON.stringify(categories)}</p>
+        <p>{disconnectCategories.length && JSON.stringify(disconnectCategories)}</p>
         <button type='submit'>update item</button>
       </form>
       {loading && <p>updating...</p>}
