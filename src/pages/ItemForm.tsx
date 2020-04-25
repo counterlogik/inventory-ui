@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, navigate } from '@reach/router';
 import {
   UpsertItemDocument,
   UpsertItemMutationVariables,
@@ -72,7 +72,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
     UpsertItemDocument,
     {
       onCompleted: (data: UpsertItemMutation) => {
-        props.navigate(`/items/${data.upsertOneItem.id}`);
+        navigate(`/items/${data.upsertOneItem.id}`);
       },
     },
   );
