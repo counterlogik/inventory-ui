@@ -6,7 +6,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import ItemCollection from './pages/ItemCollection';
 import CategoryCollection from './pages/CategoryCollection';
 import ViewItem from './pages/ViewItem';
-import AddItem from './pages/AddItem';
+import ItemForm from './pages/ItemForm';
 import theme from './theme';
 
 const client = new ApolloClient({
@@ -31,8 +31,8 @@ function App() {
             <ItemCollection path='/' />
             <ItemCollection path='items' />
             <CategoryCollection path='categories' />
-            <AddItem path='items/add' />
             <ViewItem path='items/:itemId' />
+            <ItemForm path='items/add' />
           </Router>
         </main>
       </MuiThemeProvider>

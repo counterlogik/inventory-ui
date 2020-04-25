@@ -30,15 +30,26 @@ export function UpdateItem({ item, removeUnderEdit }: UpdateItemProps): React.Re
 }
 
 interface ItemFormProps extends RouteComponentProps {
+  id?: string;
   item?: Item;
   removeUnderEdit?: () => void;
   addOrUpdateItem?: () => void;
 }
 
-export default function ItemForm({
-  item: { id, description, model, count, monetaryValue, link, notes, image, categories, locations, tags },
-  removeUnderEdit,
-}: ItemFormProps): React.ReactElement<ItemFormProps> {
+export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemFormProps> {
+  const { id, description, model, count, monetaryValue, link, notes, image } = props.item
+    ? props.item
+    : {
+        id: 0,
+        description: '',
+        model: '',
+        count: 1,
+        monetaryValue: 0,
+        link: '',
+        notes: '',
+        image: '',
+      };
+  const removeUnderEdit = props.removeUnderEdit || (() => null);
   const [simpleValues, setSimpleValues] = useState({
     description: description || '',
     model: model || '',
@@ -49,9 +60,9 @@ export default function ItemForm({
     image: image || '',
   });
 
-  const [currentCategories, setCategories] = useState(categories || []);
-  const [currentLocations, setLocations] = useState(locations || []);
-  const [currentTags, setTags] = useState(tags || []);
+  const [currentCategories, setCategories] = useState(props?.item?.categories || []);
+  const [currentLocations, setLocations] = useState(props?.item?.locations || []);
+  const [currentTags, setTags] = useState(props?.item?.tags || []);
 
   const [disconnectCategories, setDisconnectCategories] = useState<ItemIdTitleCompoundVariables[]>([]);
   const [disconnectLocations, setDisconnectLocations] = useState<ItemIdTitleCompoundVariables[]>([]);
@@ -59,285 +70,6 @@ export default function ItemForm({
 
   const [addOrUpdateItem, { loading, error }] = useMutation<UpsertItemMutation, UpsertItemMutationVariables>(
     UpsertItemDocument,
-    {
-      variables: {
-        create: {
-          owner: { connect: { id: 1 } },
-          description,
-          model,
-          count,
-          monetaryValue,
-          link,
-          notes,
-          image,
-          categories: {
-            ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
-              connect: [
-                ...currentCategories
-                  .filter((currentCategory) => currentCategory.id)
-                  .map((existingCategory) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingCategory.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectCategories.length && {
-              disconnect: [
-                ...disconnectCategories.map((disconnectCategory) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectCategory.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
-              create: [
-                ...currentCategories
-                  .filter((currentCategory) => !currentCategory.id)
-                  .map((newCategoryPlaceholder) => {
-                    return {
-                      title: newCategoryPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-          locations: {
-            ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
-              connect: [
-                ...currentLocations
-                  .filter((currentLocation) => currentLocation.id)
-                  .map((existingLocation) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingLocation.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectLocations.length && {
-              disconnect: [
-                ...disconnectLocations.map((disconnectLocation) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectLocation.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
-              create: [
-                ...currentLocations
-                  .filter((currentLocation) => !currentLocation.id)
-                  .map((newLocationPlaceholder) => {
-                    return {
-                      title: newLocationPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-          tags: {
-            ...(currentTags.filter((currentTag) => currentTag.id).length && {
-              connect: [
-                ...currentTags
-                  .filter((currentTag) => currentTag.id)
-                  .map((existingTag) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingTag.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectTags.length && {
-              disconnect: [
-                ...disconnectTags.map((disconnectTag) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectTag.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentTags.filter((currentTag) => !currentTag.id).length && {
-              create: [
-                ...currentTags
-                  .filter((currentTag) => !currentTag.id)
-                  .map((newTagPlaceholder) => {
-                    return {
-                      title: newTagPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-        },
-        where: {
-          id: id || 0, // This handles the addItem case when we load the form without an item id
-        },
-        update: {
-          owner: { connect: { id: 1 } },
-          description,
-          model,
-          count,
-          monetaryValue,
-          link,
-          notes,
-          image,
-          categories: {
-            ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
-              connect: [
-                ...currentCategories
-                  .filter((currentCategory) => currentCategory.id)
-                  .map((existingCategory) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingCategory.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectCategories.length && {
-              disconnect: [
-                ...disconnectCategories.map((disconnectCategory) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectCategory.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
-              create: [
-                ...currentCategories
-                  .filter((currentCategory) => !currentCategory.id)
-                  .map((newCategoryPlaceholder) => {
-                    return {
-                      title: newCategoryPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-          locations: {
-            ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
-              connect: [
-                ...currentLocations
-                  .filter((currentLocation) => currentLocation.id)
-                  .map((existingLocation) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingLocation.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectLocations.length && {
-              disconnect: [
-                ...disconnectLocations.map((disconnectLocation) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectLocation.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
-              create: [
-                ...currentLocations
-                  .filter((currentLocation) => !currentLocation.id)
-                  .map((newLocationPlaceholder) => {
-                    return {
-                      title: newLocationPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-          tags: {
-            ...(currentTags.filter((currentTag) => currentTag.id).length && {
-              connect: [
-                ...currentTags
-                  .filter((currentTag) => currentTag.id)
-                  .map((existingTag) => {
-                    return {
-                      // eslint-disable-next-line @typescript-eslint/camelcase
-                      ownerId_title: {
-                        ownerId: 1,
-                        title: existingTag.title,
-                      },
-                    };
-                  }),
-              ],
-            }),
-            ...(disconnectTags.length && {
-              disconnect: [
-                ...disconnectTags.map((disconnectTag) => {
-                  return {
-                    // eslint-disable-next-line @typescript-eslint/camelcase
-                    ownerId_title: {
-                      ownerId: 1,
-                      title: disconnectTag.title,
-                    },
-                  };
-                }),
-              ],
-            }),
-            ...(currentTags.filter((currentTag) => !currentTag.id).length && {
-              create: [
-                ...currentTags
-                  .filter((currentTag) => !currentTag.id)
-                  .map((newTagPlaceholder) => {
-                    return {
-                      title: newTagPlaceholder.title,
-                      owner: { connect: { id: 1 } },
-                    };
-                  }),
-              ],
-            }),
-          },
-        },
-      },
-    },
   );
 
   const { loading: userCatgoriesLoading, error: userCatgoriesError, data: userCategoriesData } = useQuery<
@@ -367,47 +99,334 @@ export default function ItemForm({
 
   return (
     <div>
-      <h3>{description || 'new item'}</h3>
+      <h3>{simpleValues.description || 'new item'}</h3>
       <form
         onSubmit={async (event) => {
           event.preventDefault();
           if (!description) return;
-          await addOrUpdateItem();
+          await addOrUpdateItem({
+            variables: {
+              create: {
+                owner: { connect: { id: 1 } },
+                description: simpleValues.description,
+                model: simpleValues.model,
+                count: simpleValues.count,
+                monetaryValue: simpleValues.monetaryValue,
+                link: simpleValues.link,
+                notes: simpleValues.notes,
+                image: simpleValues.image,
+                categories: {
+                  ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
+                    connect: [
+                      ...currentCategories
+                        .filter((currentCategory) => currentCategory.id)
+                        .map((existingCategory) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingCategory.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectCategories.length && {
+                    disconnect: [
+                      ...disconnectCategories.map((disconnectCategory) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectCategory.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
+                    create: [
+                      ...currentCategories
+                        .filter((currentCategory) => !currentCategory.id)
+                        .map((newCategoryPlaceholder) => {
+                          return {
+                            title: newCategoryPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+                locations: {
+                  ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
+                    connect: [
+                      ...currentLocations
+                        .filter((currentLocation) => currentLocation.id)
+                        .map((existingLocation) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingLocation.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectLocations.length && {
+                    disconnect: [
+                      ...disconnectLocations.map((disconnectLocation) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectLocation.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
+                    create: [
+                      ...currentLocations
+                        .filter((currentLocation) => !currentLocation.id)
+                        .map((newLocationPlaceholder) => {
+                          return {
+                            title: newLocationPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+                tags: {
+                  ...(currentTags.filter((currentTag) => currentTag.id).length && {
+                    connect: [
+                      ...currentTags
+                        .filter((currentTag) => currentTag.id)
+                        .map((existingTag) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingTag.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectTags.length && {
+                    disconnect: [
+                      ...disconnectTags.map((disconnectTag) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectTag.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentTags.filter((currentTag) => !currentTag.id).length && {
+                    create: [
+                      ...currentTags
+                        .filter((currentTag) => !currentTag.id)
+                        .map((newTagPlaceholder) => {
+                          return {
+                            title: newTagPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+              },
+              where: {
+                id: id || 0, // This handles the addItem case when we load the form without an item id
+              },
+              update: {
+                owner: { connect: { id: 1 } },
+                description: simpleValues.description,
+                model: simpleValues.model,
+                count: simpleValues.count,
+                monetaryValue: simpleValues.monetaryValue,
+                link: simpleValues.link,
+                notes: simpleValues.notes,
+                image: simpleValues.image,
+                categories: {
+                  ...(currentCategories.filter((currentCategory) => currentCategory.id).length && {
+                    connect: [
+                      ...currentCategories
+                        .filter((currentCategory) => currentCategory.id)
+                        .map((existingCategory) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingCategory.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectCategories.length && {
+                    disconnect: [
+                      ...disconnectCategories.map((disconnectCategory) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectCategory.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentCategories.filter((currentCategory) => !currentCategory.id).length && {
+                    create: [
+                      ...currentCategories
+                        .filter((currentCategory) => !currentCategory.id)
+                        .map((newCategoryPlaceholder) => {
+                          return {
+                            title: newCategoryPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+                locations: {
+                  ...(currentLocations.filter((currentLocation) => currentLocation.id).length && {
+                    connect: [
+                      ...currentLocations
+                        .filter((currentLocation) => currentLocation.id)
+                        .map((existingLocation) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingLocation.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectLocations.length && {
+                    disconnect: [
+                      ...disconnectLocations.map((disconnectLocation) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectLocation.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentLocations.filter((currentLocation) => !currentLocation.id).length && {
+                    create: [
+                      ...currentLocations
+                        .filter((currentLocation) => !currentLocation.id)
+                        .map((newLocationPlaceholder) => {
+                          return {
+                            title: newLocationPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+                tags: {
+                  ...(currentTags.filter((currentTag) => currentTag.id).length && {
+                    connect: [
+                      ...currentTags
+                        .filter((currentTag) => currentTag.id)
+                        .map((existingTag) => {
+                          return {
+                            // eslint-disable-next-line @typescript-eslint/camelcase
+                            ownerId_title: {
+                              ownerId: 1,
+                              title: existingTag.title,
+                            },
+                          };
+                        }),
+                    ],
+                  }),
+                  ...(disconnectTags.length && {
+                    disconnect: [
+                      ...disconnectTags.map((disconnectTag) => {
+                        return {
+                          // eslint-disable-next-line @typescript-eslint/camelcase
+                          ownerId_title: {
+                            ownerId: 1,
+                            title: disconnectTag.title,
+                          },
+                        };
+                      }),
+                    ],
+                  }),
+                  ...(currentTags.filter((currentTag) => !currentTag.id).length && {
+                    create: [
+                      ...currentTags
+                        .filter((currentTag) => !currentTag.id)
+                        .map((newTagPlaceholder) => {
+                          return {
+                            title: newTagPlaceholder.title,
+                            owner: { connect: { id: 1 } },
+                          };
+                        }),
+                    ],
+                  }),
+                },
+              },
+            },
+          });
           removeUnderEdit();
         }}
       >
         <p>
           <label htmlFor='description'>description</label>
-          <input name='description' defaultValue={description} onChange={(event) => handleInputChange(event)} />
+          <input
+            name='description'
+            defaultValue={simpleValues.description}
+            onChange={(event) => handleInputChange(event)}
+          />
         </p>
         <p>
           <label htmlFor='model'>model</label>
-          <input name='model' defaultValue={model} onChange={(event) => handleInputChange(event)} />
+          <input name='model' defaultValue={simpleValues.model} onChange={(event) => handleInputChange(event)} />
         </p>
         <p>
           <label htmlFor='count'>count</label>
-          <input name='count' type='number' defaultValue={count} onChange={(event) => handleInputChange(event)} />
+          <input
+            name='count'
+            type='number'
+            defaultValue={simpleValues.count}
+            onChange={(event) => handleInputChange(event)}
+          />
         </p>
         <p>
           <label htmlFor='monetary-value'>value in $</label>
           <input
             name='monetary-value'
             type='number'
-            defaultValue={monetaryValue}
+            defaultValue={simpleValues.monetaryValue}
             onChange={(event) => handleInputChange(event)}
           />
         </p>
         <p>
           <label htmlFor='link'>link</label>
-          <input name='link' defaultValue={link} onChange={(event) => handleInputChange(event)} />
+          <input name='link' defaultValue={simpleValues.link} onChange={(event) => handleInputChange(event)} />
         </p>
         <p>
           <label htmlFor='notes'>notes</label>
-          <input name='notes' defaultValue={notes} onChange={(event) => handleInputChange(event)} />
+          <input name='notes' defaultValue={simpleValues.notes} onChange={(event) => handleInputChange(event)} />
         </p>
         <p>
           <label htmlFor='image'>image</label>
-          <input name='image' defaultValue={image} onChange={(event) => handleInputChange(event)} />
+          <input name='image' defaultValue={simpleValues.image} onChange={(event) => handleInputChange(event)} />
         </p>
         {userCatgoriesLoading && <p>loading...</p>}
         {userCatgoriesError && <p>error. please try again</p>}
