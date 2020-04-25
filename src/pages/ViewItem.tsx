@@ -29,10 +29,10 @@ export default function ViewItem(props: ViewItemProps) {
           {data.item.monetaryValue && <div className='detail'>{data.item.monetaryValue}</div>}
           {data.item.link && <div className='detail'>{data.item.link}</div>}
           {data.item.notes && <div className='detail'>{data.item.notes}</div>}
-          {data.item.image && <div className='detail'>{data.item.image}</div>}
           {data.item.categories?.length && <div className='detail'>{JSON.stringify(data.item.categories)}</div>}
           {data.item.locations?.length && <div className='detail'>{JSON.stringify(data.item.locations)}</div>}
           {data.item.tags?.length && <div className='detail'>{JSON.stringify(data.item.tags)}</div>}
+          {data.item.image && <img width='200' src={data.item.image} alt='Upload Preview' />}
         </div>
       ) : (
         <UpdateItem item={data.item as Item} removeUnderEdit={() => setUnderEdit(false)} />

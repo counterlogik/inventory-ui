@@ -13,7 +13,6 @@ export type Scalars = {
 };
 
 export type Query = {
-   __typename?: 'Query';
   user?: Maybe<User>;
   users: Array<User>;
   item?: Maybe<Item>;
@@ -120,7 +119,6 @@ export type UserWhereUniqueInput = {
 };
 
 export type User = {
-   __typename?: 'User';
   id: Scalars['Int'];
   email: Scalars['String'];
   password: Scalars['String'];
@@ -179,7 +177,6 @@ export type OwnerIdTitleCompoundUniqueInput = {
 };
 
 export type Category = {
-   __typename?: 'Category';
   id: Scalars['Int'];
   owner: User;
   ownerId: Scalars['Int'];
@@ -203,7 +200,6 @@ export type ItemWhereUniqueInput = {
 };
 
 export type Item = {
-   __typename?: 'Item';
   id: Scalars['Int'];
   owner: User;
   ownerId: Scalars['Int'];
@@ -253,7 +249,6 @@ export type LocationWhereUniqueInput = {
 };
 
 export type Location = {
-   __typename?: 'Location';
   id: Scalars['Int'];
   owner: User;
   ownerId: Scalars['Int'];
@@ -284,7 +279,6 @@ export type TagWhereUniqueInput = {
 };
 
 export type Tag = {
-   __typename?: 'Tag';
   id: Scalars['Int'];
   owner: User;
   ownerId: Scalars['Int'];
@@ -302,7 +296,6 @@ export type TagItemsArgs = {
 };
 
 export type Mutation = {
-   __typename?: 'Mutation';
   createOneUser: User;
   createOneLocation: Location;
   createOneCategory: Category;
@@ -1456,108 +1449,54 @@ export type UpsertItemMutationVariables = {
 };
 
 
-export type UpsertItemMutation = (
-  { __typename?: 'Mutation' }
-  & { upsertOneItem: (
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ), categories: Array<(
-      { __typename?: 'Category' }
-      & Pick<Category, 'id' | 'title' | 'ownerId'>
-    )>, locations: Array<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'title' | 'ownerId'>
-    )>, tags: Array<(
-      { __typename?: 'Tag' }
-      & Pick<Tag, 'id' | 'title' | 'ownerId'>
-    )> }
-  ) }
-);
+export type UpsertItemMutation = { upsertOneItem: (
+    Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: Pick<User, 'email'>, categories: Array<Pick<Category, 'id' | 'title' | 'ownerId'>>, locations: Array<Pick<Location, 'id' | 'title' | 'ownerId'>>, tags: Array<Pick<Tag, 'id' | 'title' | 'ownerId'>> }
+  ) };
 
 export type GetCategoriesQueryVariables = {};
 
 
-export type GetCategoriesQuery = (
-  { __typename?: 'Query' }
-  & { categories: Array<(
-    { __typename?: 'Category' }
-    & Pick<Category, 'id' | 'title' | 'description' | 'image'>
-    & { items: Array<(
-      { __typename?: 'Item' }
-      & Pick<Item, 'id'>
-    )> }
-  )> }
-);
+export type GetCategoriesQuery = { categories: Array<(
+    Pick<Category, 'id' | 'title' | 'description' | 'image'>
+    & { items: Array<Pick<Item, 'id'>> }
+  )> };
 
 export type GetItemsQueryVariables = {};
 
 
-export type GetItemsQuery = (
-  { __typename?: 'Query' }
-  & { items: Array<(
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model'>
-  )> }
-);
+export type GetItemsQuery = { items: Array<Pick<Item, 'id' | 'description' | 'model'>> };
 
 export type AddItemMutationVariables = {
   data: ItemCreateInput;
 };
 
 
-export type AddItemMutation = (
-  { __typename?: 'Mutation' }
-  & { createOneItem: (
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ) }
-  ) }
-);
+export type AddItemMutation = { createOneItem: (
+    Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: Pick<User, 'email'> }
+  ) };
 
 export type GetUserCategoriesQueryVariables = {
   ownerId?: Maybe<Scalars['Int']>;
 };
 
 
-export type GetUserCategoriesQuery = (
-  { __typename?: 'Query' }
-  & { categoriesByUser?: Maybe<Array<(
-    { __typename?: 'Category' }
-    & Pick<Category, 'id' | 'title'>
-  )>> }
-);
+export type GetUserCategoriesQuery = { categoriesByUser?: Maybe<Array<Pick<Category, 'id' | 'title'>>> };
 
 export type GetUserLocationsQueryVariables = {
   ownerId?: Maybe<Scalars['Int']>;
 };
 
 
-export type GetUserLocationsQuery = (
-  { __typename?: 'Query' }
-  & { locationsByUser?: Maybe<Array<(
-    { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'title'>
-  )>> }
-);
+export type GetUserLocationsQuery = { locationsByUser?: Maybe<Array<Pick<Location, 'id' | 'title'>>> };
 
 export type GetUserTagsQueryVariables = {
   ownerId?: Maybe<Scalars['Int']>;
 };
 
 
-export type GetUserTagsQuery = (
-  { __typename?: 'Query' }
-  & { tagsByUser?: Maybe<Array<(
-    { __typename?: 'Tag' }
-    & Pick<Tag, 'id' | 'title'>
-  )>> }
-);
+export type GetUserTagsQuery = { tagsByUser?: Maybe<Array<Pick<Tag, 'id' | 'title'>>> };
 
 export type UpdateItemMutationVariables = {
   data: ItemUpdateInput;
@@ -1565,26 +1504,10 @@ export type UpdateItemMutationVariables = {
 };
 
 
-export type UpdateItemMutation = (
-  { __typename?: 'Mutation' }
-  & { updateOneItem?: Maybe<(
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ), categories: Array<(
-      { __typename?: 'Category' }
-      & Pick<Category, 'id' | 'title' | 'ownerId'>
-    )>, locations: Array<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'title' | 'ownerId'>
-    )>, tags: Array<(
-      { __typename?: 'Tag' }
-      & Pick<Tag, 'id' | 'title' | 'ownerId'>
-    )> }
-  )> }
-);
+export type UpdateItemMutation = { updateOneItem?: Maybe<(
+    Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: Pick<User, 'email'>, categories: Array<Pick<Category, 'id' | 'title' | 'ownerId'>>, locations: Array<Pick<Location, 'id' | 'title' | 'ownerId'>>, tags: Array<Pick<Tag, 'id' | 'title' | 'ownerId'>> }
+  )> };
 
 export type AddOrUpdateItemMutationVariables = {
   where: ItemWhereUniqueInput;
@@ -1593,52 +1516,20 @@ export type AddOrUpdateItemMutationVariables = {
 };
 
 
-export type AddOrUpdateItemMutation = (
-  { __typename?: 'Mutation' }
-  & { upsertOneItem: (
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ), categories: Array<(
-      { __typename?: 'Category' }
-      & Pick<Category, 'id' | 'title' | 'ownerId'>
-    )>, locations: Array<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'title' | 'ownerId'>
-    )>, tags: Array<(
-      { __typename?: 'Tag' }
-      & Pick<Tag, 'id' | 'title' | 'ownerId'>
-    )> }
-  ) }
-);
+export type AddOrUpdateItemMutation = { upsertOneItem: (
+    Pick<Item, 'id' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: Pick<User, 'email'>, categories: Array<Pick<Category, 'id' | 'title' | 'ownerId'>>, locations: Array<Pick<Location, 'id' | 'title' | 'ownerId'>>, tags: Array<Pick<Tag, 'id' | 'title' | 'ownerId'>> }
+  ) };
 
 export type GetItemQueryVariables = {
   where: ItemWhereUniqueInput;
 };
 
 
-export type GetItemQuery = (
-  { __typename?: 'Query' }
-  & { item?: Maybe<(
-    { __typename?: 'Item' }
-    & Pick<Item, 'id' | 'ownerId' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
-    & { owner: (
-      { __typename?: 'User' }
-      & Pick<User, 'email'>
-    ), categories: Array<(
-      { __typename?: 'Category' }
-      & Pick<Category, 'id' | 'title'>
-    )>, locations: Array<(
-      { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'title'>
-    )>, tags: Array<(
-      { __typename?: 'Tag' }
-      & Pick<Tag, 'id' | 'title'>
-    )> }
-  )> }
-);
+export type GetItemQuery = { item?: Maybe<(
+    Pick<Item, 'id' | 'ownerId' | 'description' | 'model' | 'spark' | 'count' | 'monetaryValue' | 'link' | 'notes' | 'image'>
+    & { owner: Pick<User, 'email'>, categories: Array<Pick<Category, 'id' | 'title'>>, locations: Array<Pick<Location, 'id' | 'title'>>, tags: Array<Pick<Tag, 'id' | 'title'>> }
+  )> };
 
 
 export const UpsertItemDocument = gql`

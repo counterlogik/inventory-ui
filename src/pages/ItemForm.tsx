@@ -22,6 +22,7 @@ import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
 
 interface UpdateItemProps {
   item: Item;
+  largeImage?: string;
   removeUnderEdit: () => void;
 }
 
@@ -49,6 +50,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
         notes: '',
         image: '',
       };
+  const largeImage = '';
   const removeUnderEdit = props.removeUnderEdit || (() => null);
   const [simpleValues, setSimpleValues] = useState({
     description: description || '',
@@ -58,6 +60,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
     link: link || '',
     notes: notes || '',
     image: image || '',
+    largeImage: largeImage || '',
   });
 
   const [currentCategories, setCategories] = useState(props?.item?.categories || []);
@@ -100,6 +103,26 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
 
   const handleInputChange = (event: React.ChangeEvent<{ name: string; value: string }>) => {
     setSimpleValues({ ...simpleValues, [event.currentTarget.name]: event.currentTarget.value });
+  };
+
+  const uploadFile = async (event: any) => {
+    console.log('uploading file!');
+    const files = event.target.files;
+    const data = new FormData();
+    data.append('file', files[0]);
+    data.append('upload_preset', 'inventory');
+
+    const res = await fetch(process.env.REACT_APP_CLOUDINARY_URL, {
+      method: 'POST',
+      body: data,
+    });
+    const file = await res.json();
+    console.log(file);
+    await setSimpleValues({
+      ...simpleValues,
+      image: file.secure_url,
+      largeImage: file.eager[0].secure_url,
+    });
   };
 
   return (
@@ -483,6 +506,11 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
             ) => {}
           }
         />
+        <label htmlFor='file'>
+          <input type='file' id='file' name='file' placeholder='Upload an image' required onChange={uploadFile} />
+          {simpleValues.image && <img width='200' src={simpleValues.image} alt='Upload Preview' />}
+        </label>
+
         <button type='submit'>update item</button>
       </form>
       {loading && <p>updating...</p>}
