@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { navigate } from '@reach/router';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
 import { RouteComponentProps } from '@reach/router';
@@ -70,6 +71,11 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
 
   const [addOrUpdateItem, { loading, error }] = useMutation<UpsertItemMutation, UpsertItemMutationVariables>(
     UpsertItemDocument,
+    {
+      onCompleted: (data: UpsertItemMutation) => {
+        navigate(`/items/${data.upsertOneItem.id}`);
+      },
+    },
   );
 
   const { loading: userCatgoriesLoading, error: userCatgoriesError, data: userCategoriesData } = useQuery<
@@ -387,7 +393,8 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
               },
             },
           });
-          removeUnderEdit();
+
+          removeUnderEdit && removeUnderEdit();
         }}
       >
         <p>
