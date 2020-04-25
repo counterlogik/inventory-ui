@@ -105,10 +105,9 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
     setSimpleValues({ ...simpleValues, [event.currentTarget.name]: event.currentTarget.value });
   };
 
-  const uploadFile = async (event: any) => {
-    console.log('uploading file!');
-    const files = event.target.files;
-    const data = new FormData();
+  const uploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files: FileList = event.target.files;
+    const data: FormData = new FormData();
     data.append('file', files[0]);
     data.append('upload_preset', 'inventory');
 
@@ -117,7 +116,6 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
       body: data,
     });
     const file = await res.json();
-    console.log(file);
     await setSimpleValues({
       ...simpleValues,
       image: file.secure_url,
