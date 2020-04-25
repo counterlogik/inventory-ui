@@ -103,7 +103,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
       <form
         onSubmit={async (event) => {
           event.preventDefault();
-          if (!description) return;
+          if (!simpleValues.description) return;
           await addOrUpdateItem({
             variables: {
               create: {
