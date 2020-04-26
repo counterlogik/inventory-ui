@@ -38,20 +38,19 @@ export default function ViewItem(props: ViewItemProps) {
           {data.item.image && <img width='200' src={data.item.image} alt='Upload Preview' />}
           <h4>{data.item.description} [viewing]</h4>
           <div className='detail-row'>{data.item.model && <h5>{data.item.model}</h5>}</div>
-          <ButtonGroup orientation='vertical' color='primary' aria-label='vertical contained primary button group'>
+          <ButtonGroup color='primary' aria-label='contained primary button group'>
             {Object.values(Spark).map((option, index) => (
               <Button key={option + index} variant={option === data.item.spark ? 'contained' : 'outlined'}>
                 {option}
               </Button>
             ))}
           </ButtonGroup>
-          <div className='detail-row'>{data.item.count && <div className='detail'>{data.item.count}</div>}</div>
           <List aria-label='details'>
             <ListItem button>
               <ListItemIcon>
                 <ShowChartIcon />
               </ListItemIcon>
-              <ListItemText primary={data.item.monetaryValue} />
+              <ListItemText primary={data.item.count} />
             </ListItem>
             <ListItem button>
               <ListItemIcon>
@@ -100,13 +99,13 @@ export default function ViewItem(props: ViewItemProps) {
                 <Chip size='small' avatar={<Avatar>{tag.title.charAt(0)}</Avatar>} key={tag.id} label={tag.title} />
               ))}
           </div>
+          <Fab size='medium' color='secondary' aria-label='edit' onClick={() => setUnderEdit(!underEdit)}>
+            <EditIcon />
+          </Fab>
         </div>
       ) : (
         <UpdateItem item={data.item as Item} removeUnderEdit={() => setUnderEdit(false)} />
       )}
-      <Fab color='secondary' aria-label='edit' onClick={() => setUnderEdit(!underEdit)}>
-        <EditIcon />
-      </Fab>
     </div>
   ) : (
     <p>No item found, sending you back for now!</p>

@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import FormControl from '@material-ui/core/FormControl';
+import TextField from '@material-ui/core/TextField';
+import FilledInput from '@material-ui/core/FilledInput';
+import SaveIcon from '@material-ui/icons/Save';
+import ClearIcon from '@material-ui/icons/Clear';
 import { RouteComponentProps, navigate } from '@reach/router';
+import styled from 'styled-components';
 import {
   UpsertItemDocument,
   UpsertItemMutationVariables,
@@ -16,13 +25,30 @@ import {
   GetUserTagsQueryVariables,
   GetUserTagsDocument,
   Item,
+  Spark as SparkSchemaDef,
 } from '../generated/graphql';
 import { ItemIdTitleCompoundVariables } from '../interfaces/helper-interfaces';
 import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
 
+const sparkOptions = [...Object.values(SparkSchemaDef)] as const;
+type Spark = typeof sparkOptions[number];
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+const ActionsGroup = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  button {
+    margin: 8px 0 8px 16px;
+  }
+`;
+
 interface UpdateItemProps {
   item: Item;
-  largeImage?: string;
   removeUnderEdit: () => void;
 }
 
@@ -33,34 +59,34 @@ export function UpdateItem({ item, removeUnderEdit }: UpdateItemProps): React.Re
 interface ItemFormProps extends RouteComponentProps {
   id?: string;
   item?: Item;
-  removeUnderEdit?: () => void;
+  removeUnderEdit?: () => void | undefined;
   addOrUpdateItem?: () => void;
 }
 
 export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemFormProps> {
-  const { id, description, model, count, monetaryValue, link, notes, image } = props.item
+  const { id, description, model, spark, count, monetaryValue, link, notes, image } = props.item
     ? props.item
     : {
         id: 0,
         description: '',
         model: '',
+        spark: 'LIKE',
         count: 1,
         monetaryValue: 0,
         link: '',
         notes: '',
         image: '',
       };
-  const largeImage = '';
-  const removeUnderEdit = props.removeUnderEdit || (() => null);
+  const removeUnderEdit = props.removeUnderEdit || undefined;
   const [simpleValues, setSimpleValues] = useState({
     description: description || '',
     model: model || '',
+    spark: spark || 'LIKE',
     count: count || 1,
     monetaryValue: monetaryValue || 0,
     link: link || '',
     notes: notes || '',
     image: image || '',
-    largeImage: largeImage || '',
   });
 
   const [currentCategories, setCategories] = useState(props?.item?.categories || []);
@@ -101,8 +127,19 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
     variables: { ownerId: 1 },
   });
 
-  const handleInputChange = (event: React.ChangeEvent<{ name: string; value: string }>) => {
-    setSimpleValues({ ...simpleValues, [event.currentTarget.name]: event.currentTarget.value });
+  const handleInputChange = (event: React.ChangeEvent<{ name: string; value: string; type: string }>) => {
+    setSimpleValues({
+      ...simpleValues,
+      [event.currentTarget.name]:
+        event.currentTarget.type !== 'text' ? parseInt(event.target.value) : event.currentTarget.value,
+    });
+  };
+
+  const hiddenEnumInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSparkToggleButton = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, index: number) => {
+    const option: string | undefined = sparkOptions.find((option) => option === event.currentTarget.value);
+    setSimpleValues({ ...simpleValues, spark: option });
   };
 
   const uploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +156,6 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
     await setSimpleValues({
       ...simpleValues,
       image: file.secure_url,
-      largeImage: file.eager[0].secure_url,
     });
   };
 
@@ -129,7 +165,6 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
       <form
         onSubmit={async (event) => {
           event.preventDefault();
-          if (!simpleValues.description) return;
           await addOrUpdateItem({
             variables: {
               create: {
@@ -138,6 +173,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
                       owner: { connect: { id: 1 } },
                       description: simpleValues.description,
                       model: simpleValues.model,
+                      spark: simpleValues.spark as SparkSchemaDef,
                       count: simpleValues.count,
                       monetaryValue: simpleValues.monetaryValue,
                       link: simpleValues.link,
@@ -279,6 +315,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
                 owner: { connect: { id: 1 } },
                 description: simpleValues.description,
                 model: simpleValues.model,
+                spark: simpleValues.spark as SparkSchemaDef,
                 count: simpleValues.count,
                 monetaryValue: simpleValues.monetaryValue,
                 link: simpleValues.link,
@@ -417,48 +454,81 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
           removeUnderEdit && removeUnderEdit();
         }}
       >
-        <p>
-          <label htmlFor='description'>description</label>
-          <input
+        <FormControl fullWidth>
+          <TextField
+            required
+            id='description'
             name='description'
             defaultValue={simpleValues.description}
             onChange={(event) => handleInputChange(event)}
           />
-        </p>
-        <p>
-          <label htmlFor='model'>model</label>
-          <input name='model' defaultValue={simpleValues.model} onChange={(event) => handleInputChange(event)} />
-        </p>
-        <p>
-          <label htmlFor='count'>count</label>
-          <input
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            id='model'
+            name='model'
+            defaultValue={simpleValues.model}
+            onChange={(event) => handleInputChange(event)}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <HiddenInput
+            id='spark'
+            name='spark'
+            value={simpleValues.spark}
+            ref={hiddenEnumInputRef}
+            onChange={(event) => handleInputChange(event)}
+          />
+          <label htmlFor='spark'>
+            <ButtonGroup color='primary' aria-label='contained primary button group'>
+              {Object.values(sparkOptions).map((option: string, index: number) => (
+                <Button
+                  key={option}
+                  value={option}
+                  variant={option === simpleValues.spark ? 'contained' : 'outlined'}
+                  onClick={(event) => handleSparkToggleButton(event, index)}
+                >
+                  {option}
+                </Button>
+              ))}
+            </ButtonGroup>
+          </label>
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            id='count'
             name='count'
             type='number'
             defaultValue={simpleValues.count}
             onChange={(event) => handleInputChange(event)}
           />
-        </p>
-        <p>
-          <label htmlFor='monetary-value'>value in $</label>
-          <input
-            name='monetary-value'
+        </FormControl>
+        <FormControl fullWidth>
+          <FilledInput
+            id='monetaryValue'
+            name='monetaryValue'
             type='number'
             defaultValue={simpleValues.monetaryValue}
             onChange={(event) => handleInputChange(event)}
+            startAdornment={<InputAdornment position='start'>$</InputAdornment>}
           />
-        </p>
-        <p>
-          <label htmlFor='link'>link</label>
-          <input name='link' defaultValue={simpleValues.link} onChange={(event) => handleInputChange(event)} />
-        </p>
-        <p>
-          <label htmlFor='notes'>notes</label>
-          <input name='notes' defaultValue={simpleValues.notes} onChange={(event) => handleInputChange(event)} />
-        </p>
-        <p>
-          <label htmlFor='image'>image</label>
-          <input name='image' defaultValue={simpleValues.image} onChange={(event) => handleInputChange(event)} />
-        </p>
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            id='link'
+            name='link'
+            defaultValue={simpleValues.link}
+            onChange={(event) => handleInputChange(event)}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            id='notes'
+            name='notes'
+            defaultValue={simpleValues.notes}
+            onChange={(event) => handleInputChange(event)}
+          />
+        </FormControl>
         {userCatgoriesLoading && <p>loading...</p>}
         {userCatgoriesError && <p>error. please try again</p>}
         <ChipsCollectionInput
@@ -504,12 +574,28 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
             ) => {}
           }
         />
-        <label htmlFor='file'>
-          <input type='file' id='file' name='file' placeholder='Upload an image' required onChange={uploadFile} />
-          {simpleValues.image && <img width='200' src={simpleValues.image} alt='Upload Preview' />}
-        </label>
-
-        <button type='submit'>update item</button>
+        <FormControl fullWidth>
+          <HiddenInput type='file' accept='image/*' id='file' name='file' onChange={uploadFile} />
+          <label htmlFor='file'>
+            <Button variant='contained' color='primary' component='span'>
+              upload image
+            </Button>
+          </label>
+        </FormControl>
+        <ActionsGroup>
+          <Button
+            variant='contained'
+            color='secondary'
+            size='large'
+            onClick={() => (removeUnderEdit ? removeUnderEdit() : navigate('/'))}
+            startIcon={<ClearIcon />}
+          >
+            Cancel
+          </Button>
+          <Button type='submit' variant='contained' color='primary' size='large' startIcon={<SaveIcon />}>
+            Save
+          </Button>
+        </ActionsGroup>
       </form>
       {loading && <p>updating...</p>}
       {error && <p>error. please try again</p>}
