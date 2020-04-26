@@ -35,7 +35,7 @@ export default function ViewItem(props: ViewItemProps) {
     <div className='wrapper'>
       {!underEdit ? (
         <div className='details'>
-          {data.item.image && <img width='200' src={data.item.image} alt='Upload Preview' />}
+          {data.item.image && <img width='200' src={data.item.image} alt='item' />}
           <h4>{data.item.description} [viewing]</h4>
           <div className='detail-row'>{data.item.model && <h5>{data.item.model}</h5>}</div>
           <ButtonGroup color='primary' aria-label='contained primary button group'>

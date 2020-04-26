@@ -6,6 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import { ItemIdTitleCompoundVariables } from '../interfaces/helper-interfaces';
 
 type ChipsCollectionInputProps = {
+  optionsType: string;
   existingEntryOptions: ItemIdTitleCompoundVariables[];
   selectedEntries: ItemIdTitleCompoundVariables[];
   disconnectEntries: ItemIdTitleCompoundVariables[];
@@ -18,6 +19,7 @@ type ChipsCollectionInputProps = {
 };
 
 export const ChipsCollectionInput: React.FC<ChipsCollectionInputProps> = ({
+  optionsType,
   existingEntryOptions = [],
   selectedEntries,
   disconnectEntries,
@@ -32,6 +34,7 @@ export const ChipsCollectionInput: React.FC<ChipsCollectionInputProps> = ({
       options={existingEntryOptions.map((existingEntryOption) => existingEntryOption.title)}
       value={selectedEntries.map((selectedEntry) => selectedEntry.title)}
       freeSolo
+      placeholder='add tags here'
       renderTags={(connectedEntries, getTagProps) =>
         connectedEntries.map((currentEntryTitle, index) => (
           <Chip
@@ -58,7 +61,9 @@ export const ChipsCollectionInput: React.FC<ChipsCollectionInputProps> = ({
           />
         ))
       }
-      renderInput={(params) => <TextField {...params} variant='filled' />}
+      renderInput={(params) => (
+        <TextField {...params} placeholder={`+ ${optionsType}`} variant='outlined' margin='dense' />
+      )}
       onChange={(event, value: string[], reason: string) => {
         event.preventDefault();
         const appendCategoryTitle = value.splice(-1)[0];

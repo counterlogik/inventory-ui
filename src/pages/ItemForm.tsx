@@ -3,14 +3,15 @@ import { useQuery } from '@apollo/react-hooks';
 import { useMutation } from '@apollo/react-hooks';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import FormControl from '@material-ui/core/FormControl';
-import TextField from '@material-ui/core/TextField';
-import FilledInput from '@material-ui/core/FilledInput';
+import InputLabel from '@material-ui/core/InputLabel';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
 import SaveIcon from '@material-ui/icons/Save';
 import ClearIcon from '@material-ui/icons/Clear';
 import { RouteComponentProps, navigate } from '@reach/router';
 import styled from 'styled-components';
+import { TextField } from '@material-ui/core';
 import {
   UpsertItemDocument,
   UpsertItemMutationVariables,
@@ -32,6 +33,11 @@ import { ChipsCollectionInput } from '../components/ChipsCollectionInput';
 
 const sparkOptions = [...Object.values(SparkSchemaDef)] as const;
 type Spark = typeof sparkOptions[number];
+
+const ToggleButtonFormControl = styled.div`
+  margin-top: 16px;
+  margin-bottom: 8px;
+`;
 
 const HiddenInput = styled.input`
   display: none;
@@ -161,7 +167,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
 
   return (
     <div>
-      <h3>{simpleValues.description || 'new item'}</h3>
+      {simpleValues.image && <img width='200' src={simpleValues.image} alt='item' />}
       <form
         onSubmit={async (event) => {
           event.preventDefault();
@@ -454,32 +460,39 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
           removeUnderEdit && removeUnderEdit();
         }}
       >
-        <FormControl fullWidth>
-          <TextField
-            required
-            id='description'
-            name='description'
-            defaultValue={simpleValues.description}
-            onChange={(event) => handleInputChange(event)}
-          />
-        </FormControl>
-        <FormControl fullWidth>
-          <TextField
-            id='model'
-            name='model'
-            defaultValue={simpleValues.model}
-            onChange={(event) => handleInputChange(event)}
-          />
-        </FormControl>
-        <FormControl fullWidth>
+        <TextField
+          fullWidth
+          variant='outlined'
+          required
+          id='description'
+          name='description'
+          placeholder='description'
+          margin='normal'
+          InputProps={{ margin: 'dense' }}
+          defaultValue={simpleValues.description}
+          onChange={(event) => handleInputChange(event)}
+        />
+        <TextField
+          fullWidth
+          variant='outlined'
+          id='model'
+          name='model'
+          placeholder='model'
+          margin='normal'
+          InputProps={{ margin: 'dense' }}
+          defaultValue={simpleValues.model}
+          onChange={(event) => handleInputChange(event)}
+        />
+        <ToggleButtonFormControl>
           <HiddenInput
             id='spark'
             name='spark'
+            placeholder='spark'
             value={simpleValues.spark}
             ref={hiddenEnumInputRef}
             onChange={(event) => handleInputChange(event)}
           />
-          <label htmlFor='spark'>
+          <InputLabel htmlFor='spark'>
             <ButtonGroup color='primary' aria-label='contained primary button group'>
               {Object.values(sparkOptions).map((option: string, index: number) => (
                 <Button
@@ -492,46 +505,60 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
                 </Button>
               ))}
             </ButtonGroup>
-          </label>
-        </FormControl>
-        <FormControl fullWidth>
-          <TextField
-            id='count'
-            name='count'
-            type='number'
-            defaultValue={simpleValues.count}
-            onChange={(event) => handleInputChange(event)}
-          />
-        </FormControl>
-        <FormControl fullWidth>
-          <FilledInput
+          </InputLabel>
+        </ToggleButtonFormControl>
+        <TextField
+          fullWidth
+          variant='outlined'
+          id='count'
+          name='count'
+          placeholder='count'
+          type='number'
+          margin='normal'
+          InputProps={{ margin: 'dense' }}
+          defaultValue={simpleValues.count}
+          onChange={(event) => handleInputChange(event)}
+        />
+        <FormControl fullWidth variant='outlined' margin='normal'>
+          <InputLabel htmlFor='monetaryValue'>Amount</InputLabel>
+          <OutlinedInput
             id='monetaryValue'
             name='monetaryValue'
+            placeholder='monetaryValue'
             type='number'
+            margin='dense'
             defaultValue={simpleValues.monetaryValue}
             onChange={(event) => handleInputChange(event)}
             startAdornment={<InputAdornment position='start'>$</InputAdornment>}
+            labelWidth={60}
           />
         </FormControl>
-        <FormControl fullWidth>
-          <TextField
-            id='link'
-            name='link'
-            defaultValue={simpleValues.link}
-            onChange={(event) => handleInputChange(event)}
-          />
-        </FormControl>
-        <FormControl fullWidth>
-          <TextField
-            id='notes'
-            name='notes'
-            defaultValue={simpleValues.notes}
-            onChange={(event) => handleInputChange(event)}
-          />
-        </FormControl>
+        <TextField
+          fullWidth
+          variant='outlined'
+          id='link'
+          name='link'
+          placeholder='link'
+          margin='normal'
+          InputProps={{ margin: 'dense' }}
+          defaultValue={simpleValues.link}
+          onChange={(event) => handleInputChange(event)}
+        />
+        <TextField
+          fullWidth
+          variant='outlined'
+          id='notes'
+          name='notes'
+          placeholder='notes'
+          margin='normal'
+          InputProps={{ margin: 'dense' }}
+          defaultValue={simpleValues.notes}
+          onChange={(event) => handleInputChange(event)}
+        />
         {userCatgoriesLoading && <p>loading...</p>}
         {userCatgoriesError && <p>error. please try again</p>}
         <ChipsCollectionInput
+          optionsType='category'
           existingEntryOptions={userCategoriesData?.categoriesByUser as ItemIdTitleCompoundVariables[]}
           selectedEntries={currentCategories}
           disconnectEntries={disconnectCategories}
@@ -547,6 +574,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
         {userLocationsLoading && <p>loading...</p>}
         {userLocationsError && <p>error. please try again</p>}
         <ChipsCollectionInput
+          optionsType='location'
           existingEntryOptions={userLocationsData?.locationsByUser as ItemIdTitleCompoundVariables[]}
           selectedEntries={currentLocations}
           disconnectEntries={disconnectLocations}
@@ -562,6 +590,7 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
         {userTagsLoading && <p>loading...</p>}
         {userTagsError && <p>error. please try again</p>}
         <ChipsCollectionInput
+          optionsType='tag'
           existingEntryOptions={userTagsData?.tagsByUser as ItemIdTitleCompoundVariables[]}
           selectedEntries={currentTags}
           disconnectEntries={disconnectTags}
@@ -574,25 +603,25 @@ export default function ItemForm(props: ItemFormProps): React.ReactElement<ItemF
             ) => {}
           }
         />
-        <FormControl fullWidth>
+        <FormControl fullWidth variant='outlined' margin='dense'>
           <HiddenInput type='file' accept='image/*' id='file' name='file' onChange={uploadFile} />
           <label htmlFor='file'>
-            <Button variant='contained' color='primary' component='span'>
+            <Button color='primary' component='span' variant='outlined'>
               upload image
             </Button>
           </label>
         </FormControl>
         <ActionsGroup>
           <Button
-            variant='contained'
+            variant='outlined'
             color='secondary'
-            size='large'
+            size='medium'
             onClick={() => (removeUnderEdit ? removeUnderEdit() : navigate('/'))}
             startIcon={<ClearIcon />}
           >
             Cancel
           </Button>
-          <Button type='submit' variant='contained' color='primary' size='large' startIcon={<SaveIcon />}>
+          <Button type='submit' variant='contained' color='primary' size='medium' startIcon={<SaveIcon />}>
             Save
           </Button>
         </ActionsGroup>
