@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@apollo/react-hooks';
-import { RouteComponentProps } from '@reach/router';
+import { RouteComponentProps, Link } from '@reach/router';
 import { GetItemsDocument, GetItemsQuery, Item } from '../generated/graphql';
 
 export default function ItemCollection(props: RouteComponentProps) {
@@ -14,7 +14,9 @@ export default function ItemCollection(props: RouteComponentProps) {
       {data!.items.map((item: Pick<Item, 'id' | 'description' | 'model'>) => {
         return (
           <p key={item.id}>
-            {item.id} {item.model} {item.description}
+            <Link to={`/items/${item.id}`}>
+              {item.model} {item.description}
+            </Link>
           </p>
         );
       })}
