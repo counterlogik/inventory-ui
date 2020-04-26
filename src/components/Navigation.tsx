@@ -7,12 +7,18 @@ import CategoryIcon from '@material-ui/icons/Category';
 import AddIcon from '@material-ui/icons/Add';
 import styled from 'styled-components';
 
-const Navigation = styled.div`
-  background-color: #ffffff;
+const Navigation = styled.nav`
+  background-color: #303030;
   position: fixed;
   right: 0;
   bottom: 0;
   left: 0;
+  display: flex;
+  justify-content: space-between;
+
+  .MuiTabs-root {
+    width: 100%;
+  }
 `;
 
 export default function ItemCollection() {
